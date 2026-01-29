@@ -137,7 +137,7 @@ def get_keywords(conn=Depends(get_db_connection)):
         cur.execute("""
             SELECT keyword, COUNT(*) as count 
             FROM kwatch_alert_results 
-            WHERE keyword IS NOT NULL
+            WHERE keyword IS NOT NULL AND author != 'AutoModerator'
             GROUP BY keyword 
             ORDER BY count DESC
         """)
@@ -150,9 +150,23 @@ def get_keywords(conn=Depends(get_db_connection)):
         response.extend([{"keyword": r['keyword'], "count": r['count']} for r in results])
         return response
 
+def build_keyword_filter(keywords: List[str]):
+    """Helper to build SQL and params for keyword filtering."""
+    if "All" in keywords or not keywords:
+        return "", []
+    
+    # Filter keywords (exclude 'All' if it's there but others are too)
+    clean_keywords = [k for k in keywords if k != "All"]
+    if not clean_keywords:
+        return "", []
+
+    sql = " AND keyword IN %s"
+    params = [tuple(clean_keywords)]
+    return sql, params
+
 @app.get("/api/mentions")
 def get_mentions(
-    keyword: str = "All",
+    keyword: List[str] = Query(["All"]),
     start: str = None,
     end: str = None,
     limit: int = 50,
@@ -161,12 +175,12 @@ def get_mentions(
     conn=Depends(get_db_connection)
 ):
     """Get a paginated list of mentions."""
-    query = "SELECT id, author, content, received_at, url, sentiment, keyword FROM kwatch_alert_results WHERE 1=1"
+    query = "SELECT id, author, content, received_at, url, sentiment, keyword FROM kwatch_alert_results WHERE author != 'AutoModerator'"
     params = []
 
-    if keyword != "All":
-        query += " AND keyword = %s"
-        params.append(keyword)
+    kw_sql, kw_params = build_keyword_filter(keyword)
+    query += kw_sql
+    params.extend(kw_params)
     
     if start:
         query += " AND received_at >= %s"
@@ -179,6 +193,12 @@ def get_mentions(
     params.extend([limit, offset])
 
     with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+        # Get total count for these filters
+        count_query = "SELECT COUNT(*) FROM kwatch_alert_results WHERE author != 'AutoModerator'" + kw_sql
+        cur.execute(count_query, tuple(kw_params))
+        total_count = cur.fetchone()['count']
+
+        # Get actual mentions
         cur.execute(query, tuple(params))
         rows = cur.fetchall()
         
@@ -195,22 +215,22 @@ def get_mentions(
                 "source": "Reddit"
             })
             
-        return {"mentions": results}
+        return {"mentions": results, "total": total_count}
 
 @app.get("/api/stats/unique-authors")
 def get_unique_authors(
-    keyword: str = Query("All"),
+    keyword: List[str] = Query(["All"]),
     start: Optional[str] = None,
     end: Optional[str] = None,
     conn=Depends(get_db_connection)
 ):
     """Get count of unique authors."""
-    query = "SELECT COUNT(DISTINCT author) as count FROM kwatch_alert_results WHERE 1=1"
+    query = "SELECT COUNT(DISTINCT author) as count FROM kwatch_alert_results WHERE author != 'AutoModerator'"
     params = []
 
-    if keyword != "All":
-        query += " AND keyword = %s"
-        params.append(keyword)
+    kw_sql, kw_params = build_keyword_filter(keyword)
+    query += kw_sql
+    params.extend(kw_params)
     if start:
         query += " AND received_at >= %s"
         params.append(start)
@@ -223,48 +243,58 @@ def get_unique_authors(
         result = cur.fetchone()
         return {"count": result[0]}
 
-@app.get("/api/stats/authors", response_model=List[AuthorStat])
+@app.get("/api/stats/authors")
 def get_author_list(
-    keyword: str = Query("All"),
+    keyword: List[str] = Query(["All"]),
     limit: int = 50,
+    offset: int = 0,
     conn=Depends(get_db_connection)
 ):
-    """Get list of top authors for Authors Tab."""
-    query = """
-        SELECT author, COUNT(*) as count
+    """Get a paginated list of top authors for Authors Tab."""
+    base_query = """
         FROM kwatch_alert_results
-        WHERE 1=1
+        WHERE author != 'AutoModerator'
     """
-    params = []
+    kw_sql, kw_params = build_keyword_filter(keyword)
+    base_query += kw_sql
     
-    if keyword != "All":
-        query += " AND keyword = %s"
-        params.append(keyword)
-        
-    query += " GROUP BY author ORDER BY count DESC LIMIT %s"
-    params.append(limit)
+    # Get total count
+    count_query = "SELECT COUNT(DISTINCT author) " + base_query
+    
+    # Get actual data
+    data_query = "SELECT author, COUNT(*) as count " + base_query + " GROUP BY author ORDER BY count DESC LIMIT %s OFFSET %s"
     
     with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-        cur.execute(query, tuple(params))
+        # Count total unique authors
+        cur.execute(count_query, tuple(kw_params))
+        total_count = cur.fetchone()['count']
+        
+        # Get paginated authors
+        params = list(kw_params) + [limit, offset]
+        cur.execute(data_query, tuple(params))
         rows = cur.fetchall()
-        return [{"author": r['author'], "count": r['count']} for r in rows]
+        
+        return {
+            "authors": [{"author": r['author'], "count": r['count']} for r in rows],
+            "total": total_count
+        }
 
 @app.get("/api/stats/counts-by-day", response_model=List[CountByDay])
 def get_counts_by_day(
-    keyword: str = Query("All"),
+    keyword: List[str] = Query(["All"]),
     conn=Depends(get_db_connection)
 ):
     """Get mention counts aggregated by day."""
     query = """
         SELECT DATE(received_at) as date, COUNT(*) as count 
         FROM kwatch_alert_results 
-        WHERE 1=1
+        WHERE author != 'AutoModerator'
     """
     params = []
     
-    if keyword != "All":
-        query += " AND keyword = %s"
-        params.append(keyword)
+    kw_sql, kw_params = build_keyword_filter(keyword)
+    query += kw_sql
+    params.extend(kw_params)
 
     query += " GROUP BY DATE(received_at) ORDER BY date ASC"
 
@@ -275,16 +305,16 @@ def get_counts_by_day(
 
 @app.get("/api/stats/sentiment")
 def get_sentiment_groups(
-    keyword: str = Query("All"),
+    keyword: List[str] = Query(["All"]),
     conn=Depends(get_db_connection)
 ):
     """Get sentiment distribution."""
-    query = "SELECT sentiment, COUNT(*) as count FROM kwatch_alert_results WHERE 1=1"
+    query = "SELECT sentiment, COUNT(*) as count FROM kwatch_alert_results WHERE author != 'AutoModerator'"
     params = []
 
-    if keyword != "All":
-        query += " AND keyword = %s"
-        params.append(keyword)
+    kw_sql, kw_params = build_keyword_filter(keyword)
+    query += kw_sql
+    params.extend(kw_params)
         
     query += " GROUP BY sentiment"
 

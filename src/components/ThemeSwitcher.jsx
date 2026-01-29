@@ -7,8 +7,7 @@ const ThemeSwitcher = () => {
 
     const themes = [
         { id: 'enterprise', label: '🏢 Enterprise' },
-        { id: 'clinical', label: '🟡 Kognitos' },
-        { id: 'cyber', label: '👾 Cyber' }
+        { id: 'boxy', label: '🟡 Boxy' }
     ];
 
     return (

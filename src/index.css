@@ -1,12 +1,27 @@
 @import './styles/variables.css';
 
+html,
 body {
     margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
     font-family: var(--font-sans);
     background-color: var(--color-bg-app);
     color: var(--color-text-main);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+@media (max-width: 768px) {
+
+    html,
+    body {
+        height: auto;
+        overflow: auto;
+        overflow-x: hidden;
+    }
 }
 
 * {

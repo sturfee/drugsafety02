@@ -31,10 +31,15 @@ export const deleteRule = async (id) => {
     return res.json();
 };
 
-export const fetchAuthors = async (keyword) => {
-    let url = `${API_BASE_URL}/api/stats/authors`;
-    if (keyword && keyword !== 'All') {
-        url += `?keyword=${encodeURIComponent(keyword)}`;
+export const fetchAuthors = async (keywords, page = 0, limit = 50) => {
+    const offset = page * limit;
+    let url = `${API_BASE_URL}/api/stats/authors?offset=${offset}&limit=${limit}`;
+    if (Array.isArray(keywords)) {
+        keywords.forEach(kw => {
+            url += `&keyword=${encodeURIComponent(kw)}`;
+        });
+    } else if (keywords && keywords !== 'All') {
+        url += `&keyword=${encodeURIComponent(keywords)}`;
     }
     const res = await fetch(url);
     if (!res.ok) throw new Error("Failed to fetch authors");
@@ -47,21 +52,33 @@ export const fetchKeywords = async () => {
     return res.json();
 };
 
-export const fetchMentions = async (keyword, page = 0, limit = 50) => {
+export const fetchMentions = async (keywords, page = 0, limit = 50) => {
     const offset = page * limit;
     let url = `${API_BASE_URL}/api/mentions?offset=${offset}&limit=${limit}`;
-    if (keyword !== 'All') url += `&keyword=${encodeURIComponent(keyword)}`;
+    if (Array.isArray(keywords)) {
+        keywords.forEach(kw => {
+            url += `&keyword=${encodeURIComponent(kw)}`;
+        });
+    } else if (keywords !== 'All') {
+        url += `&keyword=${encodeURIComponent(keywords)}`;
+    }
 
     const res = await fetch(url);
     if (!res.ok) throw new Error('Failed to fetch mentions');
     return res.json();
 };
 
-export const fetchUniqueAuthors = async (keyword) => {
-    let url = `${API_BASE_URL}/api/stats/unique-authors`;
-    if (keyword !== 'All') url += `?keyword=${encodeURIComponent(keyword)}`;
+export const fetchUniqueAuthors = async (keywords) => {
+    let url = `${API_BASE_URL}/api/stats/unique-authors?`;
+    if (Array.isArray(keywords)) {
+        keywords.forEach(kw => {
+            url += `keyword=${encodeURIComponent(kw)}&`;
+        });
+    } else if (keywords !== 'All') {
+        url += `keyword=${encodeURIComponent(keywords)}&`;
+    }
 
-    const res = await fetch(url);
+    const res = await fetch(url.slice(0, -1) || url);
     if (!res.ok) throw new Error('Failed to fetch author stats');
     return res.json();
 };

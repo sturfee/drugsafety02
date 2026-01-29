@@ -42,8 +42,8 @@
   --backdrop-filter: none;
 }
 
-/* --- Clinical (Kognitos Style) Theme --- */
-[data-theme="clinical"] {
+/* --- Boxy (Kognitos Style) Theme --- */
+[data-theme="boxy"] {
   --color-primary: #f2ff66;
   /* Kognitos Bright Yellow */
   --color-primary-dark: #dbe655;
@@ -74,39 +74,5 @@
   --shadow-lg: 8px 8px 0px 0px #1c1c1b;
 
   --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --backdrop-filter: none;
-}
-
-/* --- Cyber Watchtower Theme --- */
-[data-theme="cyber"] {
-  --color-primary: #00F0FF;
-  /* Neon Cyan */
-  --color-primary-dark: #00B8CC;
-  --color-secondary: #FF2A6D;
-  /* Glitch Red */
-
-  --color-bg-app: #050505;
-  /* Black */
-  --color-bg-surface: #0a0a0a;
-  --color-bg-panel: #111111;
-
-  --color-text-main: #E0E0E0;
-  --color-text-subtle: #888888;
-  --color-border: #333333;
-
-  --color-glass-border: #00F0FF;
-  --color-glass-bg: rgba(0, 240, 255, 0.05);
-
-  --radius-sm: 0px;
-  --radius-md: 2px;
-  --radius-lg: 4px;
-  --radius-xl: 4px;
-
-  --shadow-sm: none;
-  --shadow-md: 0 0 10px rgba(0, 240, 255, 0.2);
-  /* Glow */
-  --shadow-lg: 0 0 20px rgba(0, 240, 255, 0.1);
-
-  --font-sans: 'JetBrains Mono', 'Roboto Mono', monospace;
   --backdrop-filter: none;
 }

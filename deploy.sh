@@ -14,6 +14,10 @@ done
 
 echo "🚀 Deploying to $HOST..."
 
+# 0. Build Frontend
+echo "📦 Building Frontend..."
+npm run build
+
 # 1. Staging Directories
 echo "📂 Preparing staging areas..."
 ssh $KEY_ARG $USER@$HOST "mkdir -p ~/drugsafety/dist"

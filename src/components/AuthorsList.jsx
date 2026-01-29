@@ -1,19 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchAuthors } from '../services/api';
 
-const AuthorsList = ({ keyword }) => {
-    const [authors, setAuthors] = useState([]);
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        setLoading(true);
-        fetchAuthors(keyword)
-            .then(data => setAuthors(data))
-            .catch(err => console.error(err))
-            .finally(() => setLoading(false));
-    }, [keyword]);
-
-    if (loading) return <div style={{ padding: '10px' }}>Loading authors...</div>;
+const AuthorsList = ({ authors, loading }) => {
+    if (loading && authors.length === 0) return <div style={{ padding: '10px' }}>Loading authors...</div>;
 
     return (
         <div className="authors-list" style={{ padding: '0' }}>

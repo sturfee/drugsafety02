@@ -1,8 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
+import redditLogo from '../assets/reddit-logo.png';
+import fdaLogo from '../assets/fda-logo.png';
 
-const KeywordDropdown = ({ keywords, selectedKeywords = [], onKeywordsChange }) => {
+const SourceDropdown = ({ selectedSources = [], onSourcesChange }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
+
+    const sources = [
+        { id: 'reddit', label: 'Reddit', icon: redditLogo },
+        { id: 'fda', label: 'FDA FAERS', icon: fdaLogo },
+        { id: 'pharmacy', label: 'Pharmacy Claims', icon: null }, // Placeholder icon
+        { id: 'medical', label: 'Medical Claims', icon: null },   // Placeholder icon
+    ];
 
     // Close when clicking outside
     useEffect(() => {
@@ -15,36 +24,23 @@ const KeywordDropdown = ({ keywords, selectedKeywords = [], onKeywordsChange }) 
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const toggleKeyword = (keywordLabel) => {
-        if (keywordLabel === 'All') {
-            onKeywordsChange(['All']);
-            return;
-        }
-
-        let newSelection;
-        if (selectedKeywords.includes('All')) {
-            newSelection = [keywordLabel];
-        } else {
-            newSelection = selectedKeywords.includes(keywordLabel)
-                ? selectedKeywords.filter(k => k !== keywordLabel)
-                : [...selectedKeywords, keywordLabel];
-        }
-
-        if (newSelection.length === 0) {
-            newSelection = ['All'];
-        }
-
-        onKeywordsChange(newSelection);
+    const toggleSource = (sourceId) => {
+        const newSelection = selectedSources.includes(sourceId)
+            ? selectedSources.filter(id => id !== sourceId)
+            : [...selectedSources, sourceId];
+        onSourcesChange(newSelection);
     };
 
     const getDisplayLabel = () => {
-        if (selectedKeywords.includes('All')) return "All Keywords";
-        if (selectedKeywords.length === 1) return selectedKeywords[0];
-        return `${selectedKeywords.length} Keywords Selected`;
+        if (selectedSources.length === 0) return "Select Sources";
+        if (selectedSources.length === 1) {
+            return sources.find(s => s.id === selectedSources[0])?.label;
+        }
+        return `${selectedSources.length} Sources Selected`;
     };
 
     return (
-        <div className="keyword-dropdown-container" ref={dropdownRef} style={{ marginBottom: '20px', position: 'relative' }}>
+        <div className="source-dropdown-container" ref={dropdownRef} style={{ marginBottom: '20px' }}>
             <label style={{
                 display: 'block',
                 fontSize: '0.9rem',
@@ -54,11 +50,11 @@ const KeywordDropdown = ({ keywords, selectedKeywords = [], onKeywordsChange }) 
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
             }}>
-                Keywords
+                Data Sources
             </label>
 
             <div
-                className={`keyword-dropdown-header ${isOpen ? 'open' : ''}`}
+                className={`source-dropdown-header ${isOpen ? 'open' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     display: 'flex',
@@ -75,11 +71,11 @@ const KeywordDropdown = ({ keywords, selectedKeywords = [], onKeywordsChange }) 
             >
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: '0.95rem', fontWeight: 500 }}>{getDisplayLabel()}</span>
-                    {selectedKeywords.length > 0 && !selectedKeywords.includes('All') && (
+                    {selectedSources.length > 0 && (
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setIsOpen(false); // Retain selection, just close
+                                setIsOpen(false); // Just close
                             }}
                             style={{
                                 background: 'transparent',
@@ -112,25 +108,25 @@ const KeywordDropdown = ({ keywords, selectedKeywords = [], onKeywordsChange }) 
             </div>
 
             {isOpen && (
-                <div className="keyword-dropdown-menu" style={{
+                <div className="source-dropdown-menu" style={{
                     position: 'absolute',
                     zIndex: 100,
-                    width: '100%',
+                    width: 'calc(100% - var(--spacing-md) * 2)',
                     marginTop: '4px',
-                    backgroundColor: '#FFFFFF', // Explicit white background
+                    backgroundColor: 'var(--color-bg-surface)',
                     border: '1px solid var(--color-border)',
                     borderRadius: 'var(--radius-sm)',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                     maxHeight: '300px',
                     overflowY: 'auto'
                 }}>
-                    {keywords.map((k) => (
+                    {sources.map((source) => (
                         <div
-                            key={k.id}
-                            className="keyword-menu-item"
+                            key={source.id}
+                            className="source-menu-item"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                toggleKeyword(k.label);
+                                toggleSource(source.id);
                             }}
                             style={{
                                 display: 'flex',
@@ -138,24 +134,35 @@ const KeywordDropdown = ({ keywords, selectedKeywords = [], onKeywordsChange }) 
                                 padding: '10px 14px',
                                 cursor: 'pointer',
                                 transition: 'background 0.2s ease',
-                                borderBottom: '1px solid #f0f0f0',
-                                gap: '12px',
-                                color: '#1a1a1a' // Dark text for white background
+                                borderBottom: '1px solid var(--color-border-faint)',
+                                gap: '12px'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-alt)'}
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
                             <input
                                 type="checkbox"
-                                checked={selectedKeywords.includes(k.label)}
-                                onChange={() => { }} // Controlled by parent
+                                checked={selectedSources.includes(source.id)}
+                                onChange={() => { }} // Controlled by parent div click
                                 style={{ pointerEvents: 'none' }}
                             />
+                            {source.icon && (
+                                <img
+                                    src={source.icon}
+                                    alt={source.label}
+                                    style={{
+                                        width: '18px',
+                                        height: '18px',
+                                        objectFit: 'contain'
+                                    }}
+                                />
+                            )}
                             <span style={{
                                 fontSize: '0.9rem',
+                                color: 'var(--color-text-main)',
                                 flex: 1
                             }}>
-                                {k.label} <span style={{ color: '#888', marginLeft: '4px' }}>({k.count})</span>
+                                {source.label}
                             </span>
                         </div>
                     ))}
@@ -165,4 +172,4 @@ const KeywordDropdown = ({ keywords, selectedKeywords = [], onKeywordsChange }) 
     );
 };
 
-export default KeywordDropdown;
+export default SourceDropdown;

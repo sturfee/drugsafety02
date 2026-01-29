@@ -5,6 +5,11 @@ trigger: always_on
 Agent 1: Design Lead
 
 Mission: Create a modern, credible PV-analytics UX that’s fast to navigate and feels “enterprise pharma.”
+
+> [!IMPORTANT]
+> **Deployment Details**
+> - Standard PEM Key: `/Users/anil/Documents/XBoson/Work/drugsafety/socialListner001.pem` (Use this for all SSH/Deployment tasks).
+
 Responsibilities
 
 Own UI layout consistent with your 7 elements

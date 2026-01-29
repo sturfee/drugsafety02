@@ -1,20 +1,174 @@
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.app-header {
+    background-color: var(--color-primary);
+    color: #000;
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #000;
+    flex-shrink: 0;
+}
+
+.header-left h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+}
+
+.header-left p {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.powered-by {
+    font-size: 0.75rem;
+    font-weight: 700;
+    opacity: 0.8;
+}
+
+.header-nav {
+    display: flex;
+    gap: var(--spacing-md);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.header-nav span {
+    cursor: default;
+}
+
 /* Main App Layout Styles */
 .app-container {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    /* Ratio based on wireframe (Main Chart vs Right Panel) */
+    /* Increased width for Keywords/Post List, but Output/Rules still wider (primary) */
+    grid-template-columns: 1fr 480px;
     gap: var(--spacing-md);
     padding: var(--spacing-md);
-    height: 100vh;
-    max-width: 1600px;
-    margin: 0 auto;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
-/* Responsive adjustments */
+.left-panel,
+.right-panel {
+    min-width: 0;
+    /* Prevents panels from expanding grid */
+}
+
+/* --- Responsive adjustments --- */
+
+/* Tablet & Mobile Breakpoint */
 @media (max-width: 1024px) {
     .app-container {
         grid-template-columns: 1fr;
         height: auto;
+        overflow: visible;
+    }
+
+    .right-panel {
+        width: 100%;
+    }
+}
+
+/* Mobile Specific (Phone) */
+@media (max-width: 768px) {
+    .main-wrapper {
+        height: auto;
+        overflow: visible;
+    }
+
+    .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: var(--spacing-md);
+    }
+
+    .header-right {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .app-container {
+        display: flex;
+        flex-direction: column;
+        padding: var(--spacing-sm);
+        gap: var(--spacing-md);
+        height: auto;
+        overflow: visible;
+    }
+
+    .left-panel,
+    .right-panel {
+        width: 100%;
+        height: auto;
+        gap: var(--spacing-md);
+    }
+
+    .panel {
+        padding: var(--spacing-md);
+        height: auto !important;
+        /* Allow panels to expand with content */
+    }
+
+    /* Fixed heights for specific panels to maintain structure */
+    .output-section {
+        min-height: 400px;
+    }
+
+    .rules-section {
+        height: auto !important;
+        min-height: 300px;
+    }
+
+    .detail-section div {
+        height: auto !important;
+        min-height: 150px;
+    }
+
+    .list-section {
+        min-height: 500px;
+    }
+
+    /* Touch-friendly adjustments */
+    button,
+    .source-dropdown-header,
+    .keyword-dropdown-header {
+        min-height: 44px;
+        /* iOS minimum touch target */
+        padding: 12px !important;
+    }
+
+    input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+
+    .header-left h1 {
+        font-size: 1.25rem;
+    }
+
+    .header-left p {
+        font-size: 0.8rem;
     }
 }
 
@@ -22,12 +176,18 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    height: 100%;
+    min-height: 0;
+    /* Allow panels to shrink */
 }
 
 .right-panel {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    height: 100%;
+    min-height: 0;
+    /* Allow panels to shrink */
 }
 
 /* Utility classes for panels */
@@ -37,4 +197,24 @@
     padding: var(--spacing-md);
     box-shadow: var(--shadow-md);
     border: 1px solid var(--color-border);
+}
+
+.control-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.source-option {
+    transition: all 0.2s ease;
+}
+
+.source-option:hover {
+    border-color: var(--color-primary) !important;
+    background-color: var(--color-bg-alt) !important;
+}
+
+.source-option.active {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 1px var(--color-primary);
 }
