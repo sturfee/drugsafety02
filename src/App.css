@@ -1,0 +1,40 @@
+/* Main App Layout Styles */
+.app-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    /* Ratio based on wireframe (Main Chart vs Right Panel) */
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    height: 100vh;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .app-container {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+/* Utility classes for panels */
+.panel {
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+}

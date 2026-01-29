@@ -1,0 +1,185 @@
+
+> drug-safety-explorer@0.0.0 test
+> vitest run
+
+
+ RUN  v3.2.4 /Users/anil/Documents/XBoson/Work/drugsafety02
+
+stderr | src/components/__tests__/KeywordDropdown.test.jsx > KeywordDropdown > renders correctly with keywords
+Warning: Each child in a list should have a unique "key" prop.
+
+Check the render method of `KeywordDropdown`. See https://reactjs.org/link/warning-keys for more information.
+    at option
+    at KeywordDropdown (/Users/anil/Documents/XBoson/Work/drugsafety02/src/components/KeywordDropdown.jsx:5:28)
+
+stderr | src/components/__tests__/KeywordDropdown.test.jsx > KeywordDropdown > calls onSelectKeyword when changed
+TypeError: onKeywordChange is not a function
+    at onChange (/Users/anil/Documents/XBoson/Work/drugsafety02/src/components/KeywordDropdown.jsx:11:34)
+    at HTMLUnknownElement.callCallback (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:114:17)
+    at HTMLUnknownElement.dispatchEvent (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
+    at Object.invokeGuardedCallbackDev (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
+    at invokeGuardedCallback (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
+TypeError: onKeywordChange is not a function
+    at onChange (/Users/anil/Documents/XBoson/Work/drugsafety02/src/components/KeywordDropdown.jsx:11:34)
+    at HTMLUnknownElement.callCallback (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/react-dom/cjs/react-dom.development.js:4164:14)
+    at HTMLUnknownElement.callTheUserObjectsOperation (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30)
+    at innerInvokeEventListeners (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16)
+    at invokeEventListeners (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3)
+    at HTMLUnknownElementImpl._dispatch (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9)
+    at HTMLUnknownElementImpl.dispatchEvent (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:114:17)
+    at HTMLUnknownElement.dispatchEvent (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34)
+    at Object.invokeGuardedCallbackDev (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/react-dom/cjs/react-dom.development.js:4213:16)
+    at invokeGuardedCallback (/Users/anil/Documents/XBoson/Work/drugsafety02/node_modules/react-dom/cjs/react-dom.development.js:4277:31)
+
+ ❯ src/components/__tests__/KeywordDropdown.test.jsx (2 tests | 2 failed) 152ms
+   × KeywordDropdown > renders correctly with keywords 127ms
+     → Unable to find an element with the text: All (100). This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"keyword-dropdown"[39m
+    [36m>[39m
+      [36m<label[39m
+        [33mstyle[39m=[32m"display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--color-text-subtle);"[39m
+      [36m>[39m
+        [0mKeywords[0m
+      [36m</label>[39m
+      [36m<select[39m
+        [33mstyle[39m=[32m"width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background-color: var(--color-bg-surface); color: var(--color-text-main); font-size: 1rem; outline: none;"[39m
+      [36m>[39m
+        [36m<option>[39m
+          [0m ([0m
+          [0m100[0m
+          [0m)[0m
+        [36m</option>[39m
+        [36m<option>[39m
+          [0m ([0m
+          [0m50[0m
+          [0m)[0m
+        [36m</option>[39m
+        [36m<option>[39m
+          [0m ([0m
+          [0m30[0m
+          [0m)[0m
+        [36m</option>[39m
+      [36m</select>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × KeywordDropdown > calls onSelectKeyword when changed 24ms
+     → expected "spy" to be called with arguments: [ 'Ozempic' ][90m
+
+Number of calls: [1m0[22m
+[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/__tests__/KeywordDropdown.test.jsx > KeywordDropdown > renders correctly with keywords
+TestingLibraryElementError: Unable to find an element with the text: All (100). This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"keyword-dropdown"[39m
+    [36m>[39m
+      [36m<label[39m
+        [33mstyle[39m=[32m"display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--color-text-subtle);"[39m
+      [36m>[39m
+        [0mKeywords[0m
+      [36m</label>[39m
+      [36m<select[39m
+        [33mstyle[39m=[32m"width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); background-color: var(--color-bg-surface); color: var(--color-text-main); font-size: 1rem; outline: none;"[39m
+      [36m>[39m
+        [36m<option>[39m
+          [0m ([0m
+          [0m100[0m
+          [0m)[0m
+        [36m</option>[39m
+        [36m<option>[39m
+          [0m ([0m
+          [0m50[0m
+          [0m)[0m
+        [36m</option>[39m
+        [36m<option>[39m
+          [0m ([0m
+          [0m30[0m
+          [0m)[0m
+        [36m</option>[39m
+      [36m</select>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/components/__tests__/KeywordDropdown.test.jsx:22:23
+     20| 
+     21|         // Check options
+     22|         expect(screen.getByText('All (100)')).toBeInTheDocument()
+       |                       ^
+     23|         expect(screen.getByText('Ozempic (50)')).toBeInTheDocument()
+     24|     })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/components/__tests__/KeywordDropdown.test.jsx > KeywordDropdown > calls onSelectKeyword when changed
+AssertionError: expected "spy" to be called with arguments: [ 'Ozempic' ][90m
+
+Number of calls: [1m0[22m
+[39m
+ ❯ src/components/__tests__/KeywordDropdown.test.jsx:34:30
+     32|         fireEvent.change(select, { target: { value: 'Ozempic' } })
+     33| 
+     34|         expect(mockOnSelect).toHaveBeenCalledWith('Ozempic')
+       |                              ^
+     35|     })
+     36| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+TypeError: onKeywordChange is not a function
+ ❯ onChange src/components/KeywordDropdown.jsx:11:34
+      9|             <select
+     10|                 value={selectedKeyword}
+     11|                 onChange={(e) => onKeywordChange(e.target.value)}
+       |                                  ^
+     12|                 style={{
+     13|                     width: '100%',
+ ❯ HTMLUnknownElement.callCallback node_modules/react-dom/cjs/react-dom.development.js:4164:14
+ ❯ HTMLUnknownElement.callTheUserObjectsOperation node_modules/jsdom/lib/jsdom/living/generated/EventListener.js:26:30
+ ❯ innerInvokeEventListeners node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:360:16
+ ❯ invokeEventListeners node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:296:3
+ ❯ HTMLUnknownElementImpl._dispatch node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:243:9
+ ❯ HTMLUnknownElementImpl.dispatchEvent node_modules/jsdom/lib/jsdom/living/events/EventTarget-impl.js:114:17
+ ❯ HTMLUnknownElement.dispatchEvent node_modules/jsdom/lib/jsdom/living/generated/EventTarget.js:241:34
+ ❯ Object.invokeGuardedCallbackDev node_modules/react-dom/cjs/react-dom.development.js:4213:16
+ ❯ invokeGuardedCallback node_modules/react-dom/cjs/react-dom.development.js:4277:31
+
+This error originated in "src/components/__tests__/KeywordDropdown.test.jsx" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "calls onSelectKeyword when changed". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+     Errors  1 error
+   Start at  17:34:03
+   Duration  1.83s (transform 51ms, setup 217ms, collect 33ms, tests 152ms, environment 903ms, prepare 149ms)
+

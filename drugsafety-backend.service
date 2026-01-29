@@ -1,0 +1,13 @@
+[Unit]
+Description=Drug Safety Backend API
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/drugsafety
+ExecStart=/home/ubuntu/miniconda3/envs/drugade/bin/uvicorn api_service:app --host 127.0.0.1 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

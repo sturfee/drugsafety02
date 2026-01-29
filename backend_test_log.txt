@@ -1,0 +1,145 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.9.7, pytest-7.1.2, pluggy-1.0.0
+rootdir: /Users/anil/Documents/XBoson/Work/drugsafety02
+plugins: anyio-4.12.1
+collected 6 items
+
+tests/test_api.py ..F...                                                 [100%]
+
+=================================== FAILURES ===================================
+______________________________ test_get_mentions _______________________________
+
+client = <starlette.testclient.TestClient object at 0x7fec883149d0>
+
+    def test_get_mentions(client):
+>       response = client.get("/api/mentions?keyword=Ozempic")
+
+tests/test_api.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/testclient.py:479: in get
+    return super().get(
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/httpx/_client.py:1054: in get
+    return self.request(
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/testclient.py:451: in request
+    return super().request(
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/httpx/_client.py:827: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/httpx/_client.py:1015: in _send_single_request
+    response = transport.handle_request(request)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/testclient.py:354: in handle_request
+    raise exc
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/anyio/from_thread.py:334: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+/Users/anil/opt/anaconda3/lib/python3.9/concurrent/futures/_base.py:445: in result
+    return self.__get_result()
+/Users/anil/opt/anaconda3/lib/python3.9/concurrent/futures/_base.py:390: in __get_result
+    raise self._exception
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/anyio/from_thread.py:259: in _call_func
+    retval = await retval_or_awaitable
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/fastapi/applications.py:1135: in __call__
+    await super().__call__(scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/middleware/cors.py:85: in __call__
+    await self.app(scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/routing.py:736: in app
+    await route.handle(scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/routing.py:290: in handle
+    await self.app(scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/fastapi/routing.py:115: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/fastapi/routing.py:101: in app
+    response = await f(request)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/fastapi/routing.py:355: in app
+    raw_response = await run_endpoint_function(
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/fastapi/routing.py:245: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/starlette/concurrency.py:38: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/anyio/to_thread.py:63: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/anyio/_backends/_asyncio.py:2502: in run_sync_in_worker_thread
+    return await future
+/Users/anil/opt/anaconda3/lib/python3.9/site-packages/anyio/_backends/_asyncio.py:986: in run
+    result = context.run(func, *args)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+keyword = 'Ozempic', start = None, end = None, limit = 50, offset = 0
+include_raw = False, conn = <MagicMock id='140653874034720'>
+
+    @app.get("/api/mentions")
+    def get_mentions(
+        keyword: str = "All",
+        start: str = None,
+        end: str = None,
+        limit: int = 50,
+        offset: int = 0,
+        include_raw: bool = False,
+        conn=Depends(get_db_connection)
+    ):
+        """Get a paginated list of mentions."""
+        query = "SELECT id, author, content, received_at, url, sentiment, keyword FROM kwatch_alert_results WHERE 1=1"
+        params = []
+    
+        if keyword != "All":
+            query += " AND keyword = %s"
+            params.append(keyword)
+    
+        if start:
+            query += " AND received_at >= %s"
+            params.append(start)
+        if end:
+            query += " AND received_at <= %s"
+            params.append(end)
+    
+        query += " ORDER BY received_at DESC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+    
+        with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+            cur.execute(query, tuple(params))
+            rows = cur.fetchall()
+    
+            results = []
+            for row in rows:
+                results.append({
+                    "id": row['id'],
+                    "author": row['author'],
+                    "content": row['content'],
+>                   "date": row['received_at'].isoformat() if row['received_at'] else None,
+                    "url": row['url'],
+                    "sentiment": row['sentiment'] or 'neutral',
+                    "keyword": row['keyword'],
+                    "source": "Reddit"
+                })
+E               AttributeError: 'str' object has no attribute 'isoformat'
+
+api_service.py:142: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_api.py::test_get_mentions - AttributeError: 'str' object ha...
+========================= 1 failed, 5 passed in 0.54s ==========================
