@@ -71,6 +71,8 @@
     border-radius: var(--radius-lg);
     overflow: hidden;
     /* Ensure content doesn't bleed */
+    padding: var(--spacing-lg);
+    /* Add padding to prevent text chop */
 }
 
 .post-detail-container.maximized .post-detail-content {
