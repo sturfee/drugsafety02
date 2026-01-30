@@ -18,14 +18,13 @@ DSX is a tool for Subject Matter Experts (SMEs) to explore social-reported drug 
 
 [https://54-175-252-15.nip.io/](https://54-175-252-15.nip.io/)
 
-## Architecture Overview (in development, only Reddit social channel implemented)
-![DSX-Architecture](https://github.com/user-attachments/assets/e7962f8e-2938-4dc4-8391-dce1f91a2a0b)
+## Architecture Overview (in development, only Reddit implemented for public channel reporting)
+![DsX-Architecture](https://github.com/user-attachments/assets/6b103dfc-a0f7-4696-835a-f8d23bd69689)
 
 
 ## Technology Stack
-
 - **Frontend**: React (Vite)
-- **Backend**: Python (FastAPI)
+- **Backend**: Python (FastAPI, WebHook)
 - **Database**: PostgreSQL (RDS)
-- **AI: chatGPT-4o
-- **Automation: Kognitos (To be implemented)
+- **AI**: ChatGPT-4o
+- **Automation**: Kognitos Automation (To be implemented)
