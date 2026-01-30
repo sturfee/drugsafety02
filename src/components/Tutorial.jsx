@@ -70,10 +70,10 @@ const Tutorial = () => {
                 callback={handleJoyrideCallback}
                 styles={{
                     options: {
-                        arrowColor: '#F0FDC4',
-                        backgroundColor: '#F0FDC4',
+                        arrowColor: '#FFFFFF',
+                        backgroundColor: '#FFFFFF',
                         overlayColor: 'rgba(0, 0, 0, 0.4)',
-                        primaryColor: '#0088FE',
+                        primaryColor: '#60A5FA',
                         textColor: '#1a1a1a',
                         zIndex: 10000,
                     }
@@ -93,7 +93,7 @@ const Tutorial = () => {
                         width: '40px',
                         height: '40px',
                         borderRadius: '50%',
-                        background: '#0FB6F0', // Light Blue from user request context (or standard help blue)
+                        background: '#60A5FA', // Match Palette Icon Blue
                         color: 'white',
                         border: 'none',
                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
@@ -140,12 +140,12 @@ const Tooltip = ({
         <div
             {...tooltipProps}
             style={{
-                backgroundColor: '#F0FDC4', // Light Yellow
+                backgroundColor: '#FFFFFF', // White background
                 borderRadius: '12px',
                 padding: '20px',
                 maxWidth: '350px',
                 color: '#1a1a1a',
-                border: '1px solid #D9E8AC',
+                border: '1px solid #60A5FA', // Blue border
                 boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
                 position: 'relative'
             }}
