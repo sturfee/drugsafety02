@@ -1,17 +1,28 @@
 
 import React, { useState, useEffect } from 'react';
 import { Save, Trash2, Play, Plus } from 'lucide-react';
-import { fetchRules, saveRule, deleteRule } from '../services/api';
+import { fetchRules, saveRule, deleteRule, executeRule } from '../services/api';
 
-const RulePanel = ({ onApplyRule }) => {
-    const [rules, setRules] = useState([]);
-    const [activeRuleId, setActiveRuleId] = useState(null);
+const RulePanel = ({
+    activeRuleId,
+    onActiveRuleChange,
+    onExecutionStart,
+    onExecutionComplete,
+    selectedKeywords = ['All'],
+    startDate = null,
+    endDate = null,
+    rules,
+    setRules,
+    ruleResults
+}) => {
     const [loading, setLoading] = useState(false);
 
     // Local Edit State
     const [localTitle, setLocalTitle] = useState('');
     const [localInstruction, setLocalInstruction] = useState('');
+    const [useChaining, setUseChaining] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [executingId, setExecutingId] = useState(null);
 
     // Load Rules on mount
     useEffect(() => {
@@ -25,7 +36,7 @@ const RulePanel = ({ onApplyRule }) => {
             setRules(data);
             if (data.length > 0 && !activeRuleId) {
                 // Select first by default
-                setActiveRuleId(data[0].id);
+                onActiveRuleChange(data[0].id);
             }
         } catch (err) {
             console.error(err);
@@ -52,7 +63,7 @@ const RulePanel = ({ onApplyRule }) => {
         try {
             const saved = await saveRule(tempRule);
             setRules(prev => [...prev, saved]);
-            setActiveRuleId(saved.id);
+            onActiveRuleChange(saved.id);
         } catch (err) {
             alert("Failed to create rule");
         }
@@ -81,9 +92,40 @@ const RulePanel = ({ onApplyRule }) => {
             await deleteRule(activeRuleId);
             const remaining = rules.filter(r => r.id !== activeRuleId);
             setRules(remaining);
-            setActiveRuleId(remaining.length > 0 ? remaining[0].id : null);
+            onActiveRuleChange(remaining.length > 0 ? remaining[0].id : null);
         } catch (err) {
             alert("Failed to delete rule");
+        }
+    };
+
+    const handleExecute = async () => {
+        if (!activeRuleId) return;
+        setExecutingId(activeRuleId);
+        onExecutionStart();
+        try {
+            // Determine Chaining Context
+            let contextResult = null;
+            if (useChaining && rules.length > 0) {
+                const currentIndex = rules.findIndex(r => r.id === activeRuleId);
+                if (currentIndex > 0) {
+                    const prevRuleId = rules[currentIndex - 1].id;
+                    contextResult = ruleResults[prevRuleId];
+                }
+            }
+
+            // Pass the context (filters and previous results) to the API
+            const result = await executeRule(
+                activeRuleId,
+                selectedKeywords,
+                startDate,
+                endDate,
+                contextResult
+            );
+            onExecutionComplete(result);
+        } catch (err) {
+            onExecutionComplete({ status: 'error', message: err.message });
+        } finally {
+            setExecutingId(null);
         }
     };
 
@@ -95,7 +137,7 @@ const RulePanel = ({ onApplyRule }) => {
                 {rules.map(rule => (
                     <button
                         key={rule.id}
-                        onClick={() => setActiveRuleId(rule.id)}
+                        onClick={() => onActiveRuleChange(rule.id)}
                         style={{
                             padding: '10px 16px',
                             border: 'none',
@@ -172,59 +214,74 @@ const RulePanel = ({ onApplyRule }) => {
 
                     {/* Footer Actions */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-                        <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginRight: '12px' }}>
+                                <input
+                                    type="checkbox"
+                                    id="chaining-toggle"
+                                    checked={useChaining}
+                                    onChange={(e) => setUseChaining(e.target.checked)}
+                                    style={{ cursor: 'pointer' }}
+                                />
+                                <label htmlFor="chaining-toggle" style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)', cursor: 'pointer', userSelect: 'none' }}>
+                                    Use previous result as context (Chaining)
+                                </label>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                    style={{
+                                        background: 'var(--color-bg-panel)',
+                                        border: '1px solid var(--color-border)',
+                                        padding: '8px 12px',
+                                        borderRadius: 'var(--radius-sm)',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        gap: '6px',
+                                        fontWeight: 600,
+                                        fontSize: '0.85rem'
+                                    }}
+                                >
+                                    <Save size={16} /> {isSaving ? 'Saving...' : 'Save'}
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: 'var(--color-danger)',
+                                        padding: '8px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+
                             <button
-                                onClick={handleSave}
-                                disabled={isSaving}
+                                onClick={handleExecute}
+                                disabled={!!executingId}
                                 style={{
-                                    background: 'var(--color-bg-panel)',
-                                    border: '1px solid var(--color-border)',
-                                    padding: '8px 12px',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    gap: '6px',
-                                    fontWeight: 600,
-                                    fontSize: '0.85rem'
-                                }}
-                            >
-                                <Save size={16} /> {isSaving ? 'Saving...' : 'Save'}
-                            </button>
-                            <button
-                                onClick={handleDelete}
-                                style={{
-                                    background: 'transparent',
+                                    background: executingId ? 'var(--color-text-subtle)' : '#000',
+                                    color: '#FFF',
                                     border: 'none',
-                                    color: 'var(--color-danger)',
-                                    padding: '8px',
-                                    cursor: 'pointer'
+                                    padding: '10px 24px',
+                                    borderRadius: 'var(--radius-sm)',
+                                    fontWeight: 600,
+                                    fontSize: '0.9rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    cursor: executingId ? 'not-allowed' : 'pointer',
+                                    boxShadow: 'var(--shadow-md)'
                                 }}
                             >
-                                <Trash2 size={18} />
+                                <Play size={16} fill="#FFF" /> {executingId ? 'Executing...' : 'Apply Rule'}
                             </button>
                         </div>
 
-                        <button
-                            onClick={() => onApplyRule(activeRuleId)}
-                            style={{
-                                background: '#000',
-                                color: '#FFF',
-                                border: 'none',
-                                padding: '10px 24px',
-                                borderRadius: 'var(--radius-sm)',
-                                fontWeight: 600,
-                                fontSize: '0.9rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                cursor: 'pointer',
-                                boxShadow: 'var(--shadow-md)'
-                            }}
-                        >
-                            <Play size={16} fill="#FFF" /> Apply
-                        </button>
                     </div>
-
                 </div>
             ) : (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-subtle)' }}>

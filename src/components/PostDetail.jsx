@@ -10,10 +10,8 @@ const PostDetail = ({ post, selectedKeywords = [] }) => {
         );
     }
 
-    // Fix Reddit URL: strip /comment/... or anything after the post ID
-    // Robust regex to extract the root thread URL: .../comments/<postId>
-    const match = post.url ? post.url.match(/^(https?:\/\/(?:www\.)?reddit\.com\/r\/[^\/]+\/comments\/[^\/\?]+)/) : null;
-    const cleanUrl = match ? match[0] : (post.url ? post.url.split('?')[0] : '#');
+    // Use original URL, but strip query parameters for cleanliness
+    const cleanUrl = post.url ? post.url.split('?')[0] : '#';
 
     const highlightKeywords = (content) => {
         if (!content || !selectedKeywords || selectedKeywords.length === 0) return content;

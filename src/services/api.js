@@ -82,3 +82,20 @@ export const fetchUniqueAuthors = async (keywords) => {
     if (!res.ok) throw new Error('Failed to fetch author stats');
     return res.json();
 };
+export const executeRule = async (ruleId, keywords = ['All'], startDate = null, endDate = null, previousResult = null) => {
+    const res = await fetch(`${API_BASE_URL}/api/rules/execute`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            rule_id: ruleId,
+            keywords: keywords,
+            start_date: startDate,
+            end_date: endDate,
+            previous_result: previousResult
+        }),
+    });
+    if (!res.ok) throw new Error("Failed to execute rule");
+    return res.json();
+};

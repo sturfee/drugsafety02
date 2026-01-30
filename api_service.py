@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Query, Depends
+import json
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict
@@ -6,6 +7,11 @@ import psycopg2
 from psycopg2 import pool, extras
 import os
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# Load local .env if it exists
+load_dotenv()
 
 # --- Configuration ---
 DB_HOST = os.getenv("DB_HOST", "drugsafety01.c9qieom8iu7y.us-east-1.rds.amazonaws.com")
@@ -13,8 +19,17 @@ DB_NAME = os.getenv("DB_NAME", "drugsafety")
 DB_USER = os.getenv("DB_USER", "drugsafety_admin")
 DB_PASS = os.getenv("DB_PASS", "sociallistner001")
 DB_PORT = os.getenv("DB_PORT", "5432")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-app = FastAPI(title="Drug Experience Explorer API", version="1.0.0")
+client = OpenAI(api_key=OPENAI_API_KEY)
+
+app = FastAPI(
+    title="Drug Experience Explorer API",
+    description="Backend services for analyzing drug mentions and sentiment from social media and clinical sources.",
+    version="1.1.0",
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json"
+)
 
 # --- CORS ---
 app.add_middleware(
@@ -87,6 +102,19 @@ class Rule(RuleCreate):
     id: int
     created_at: Optional[datetime]
 
+class RuleExecuteRequest(BaseModel):
+    rule_id: int
+    previous_result: Optional[Dict] = None
+    keywords: Optional[List[str]] = ["All"]
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+
+class ExecutionResult(BaseModel):
+    status: str
+    data: Optional[List[Dict]] = None
+    message: Optional[str] = None
+    sql: Optional[str] = None
+
 # --- Database Initialization ---
 def init_db():
     """Initialize database tables if they don't exist."""
@@ -124,15 +152,19 @@ if db_pool:
 
 # --- Endpoints ---
 
-@app.get("/health")
+@app.get("/health", tags=["Core"], summary="Health Check")
 def health_check():
+    """Verify that the API service is alive and healthy."""
     return {"status": "ok"}
 
 # ... (Existing /api/keywords) ...
 
-@app.get("/api/keywords", response_model=List[KeywordStats])
+@app.get("/api/keywords", response_model=List[KeywordStats], tags=["Analytics"], summary="Get Keywords")
 def get_keywords(conn=Depends(get_db_connection)):
-    """Get list of monitored keywords and their total mention counts."""
+    """
+    Fetch all monitored drug keywords and their mention counts.
+    Returns a list of keywords sorted by frequency, including a special 'All' entry for aggregation.
+    """
     with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
         cur.execute("""
             SELECT keyword, COUNT(*) as count 
@@ -164,17 +196,20 @@ def build_keyword_filter(keywords: List[str]):
     params = [tuple(clean_keywords)]
     return sql, params
 
-@app.get("/api/mentions")
+@app.get("/api/mentions", tags=["Data"], summary="Get Mentions")
 def get_mentions(
-    keyword: List[str] = Query(["All"]),
-    start: str = None,
-    end: str = None,
-    limit: int = 50,
-    offset: int = 0,
-    include_raw: bool = False,
+    keyword: List[str] = Query(["All"], description="Filter by one or more keywords"),
+    start: str = Query(None, description="Start date (ISO 8601)"),
+    end: str = Query(None, description="End date (ISO 8601)"),
+    limit: int = Query(50, ge=1, le=200, description="Paginated page size"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    include_raw: bool = Query(False, description="Whether to include raw payload in response"),
     conn=Depends(get_db_connection)
 ):
-    """Get a paginated list of mentions."""
+    """
+    Retrieve a paginated list of social media mentions filtered by keyword and date range.
+    Automatically excludes 'AutoModerator' and other bot content.
+    """
     query = "SELECT id, author, content, received_at, url, sentiment, keyword FROM kwatch_alert_results WHERE author != 'AutoModerator'"
     params = []
 
@@ -217,14 +252,14 @@ def get_mentions(
             
         return {"mentions": results, "total": total_count}
 
-@app.get("/api/stats/unique-authors")
+@app.get("/api/stats/unique-authors", tags=["Analytics"], summary="Get Unique Author Count")
 def get_unique_authors(
     keyword: List[str] = Query(["All"]),
-    start: Optional[str] = None,
-    end: Optional[str] = None,
+    start: Optional[str] = Query(None),
+    end: Optional[str] = Query(None),
     conn=Depends(get_db_connection)
 ):
-    """Get count of unique authors."""
+    """Returns the total number of distinct authors matching the provided filters."""
     query = "SELECT COUNT(DISTINCT author) as count FROM kwatch_alert_results WHERE author != 'AutoModerator'"
     params = []
 
@@ -243,14 +278,14 @@ def get_unique_authors(
         result = cur.fetchone()
         return {"count": result[0]}
 
-@app.get("/api/stats/authors")
+@app.get("/api/stats/authors", tags=["Analytics"], summary="Get Author Leadership List")
 def get_author_list(
     keyword: List[str] = Query(["All"]),
-    limit: int = 50,
-    offset: int = 0,
+    limit: int = Query(50),
+    offset: int = Query(0),
     conn=Depends(get_db_connection)
 ):
-    """Get a paginated list of top authors for Authors Tab."""
+    """Retrieves a paginated list of authors with their respective mention counts."""
     base_query = """
         FROM kwatch_alert_results
         WHERE author != 'AutoModerator'
@@ -279,12 +314,12 @@ def get_author_list(
             "total": total_count
         }
 
-@app.get("/api/stats/counts-by-day", response_model=List[CountByDay])
+@app.get("/api/stats/counts-by-day", response_model=List[CountByDay], tags=["Analytics"], summary="Get Trends by Day")
 def get_counts_by_day(
     keyword: List[str] = Query(["All"]),
     conn=Depends(get_db_connection)
 ):
-    """Get mention counts aggregated by day."""
+    """Get frequency of mentions aggregated by calendar day useful for trend charts."""
     query = """
         SELECT DATE(received_at) as date, COUNT(*) as count 
         FROM kwatch_alert_results 
@@ -303,12 +338,12 @@ def get_counts_by_day(
         rows = cur.fetchall()
         return [{"date": str(row['date']), "count": row['count']} for row in rows]
 
-@app.get("/api/stats/sentiment")
+@app.get("/api/stats/sentiment", tags=["Analytics"], summary="Get Sentiment Distribution")
 def get_sentiment_groups(
     keyword: List[str] = Query(["All"]),
     conn=Depends(get_db_connection)
 ):
-    """Get sentiment distribution."""
+    """Returns a mapping of sentiment labels to their respective frequency counts."""
     query = "SELECT sentiment, COUNT(*) as count FROM kwatch_alert_results WHERE author != 'AutoModerator'"
     params = []
 
@@ -325,17 +360,21 @@ def get_sentiment_groups(
 
 # --- Rules CRUD ---
 
-@app.get("/api/rules", response_model=List[Rule])
+@app.get("/api/rules", response_model=List[Rule], tags=["Rules"], summary="List Analysis Rules")
 def get_rules(conn=Depends(get_db_connection)):
-    """Fetch all persisted rules."""
+    """Fetch all persisted user analysis rules."""
     with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
         cur.execute("SELECT id, title, instruction, created_at FROM saved_rules ORDER BY id ASC")
         rows = cur.fetchall()
         return [dict(row) for row in rows]
 
-@app.post("/api/rules", response_model=Rule)
-def create_or_update_rule(rule: RuleCreate, id: Optional[int] = Query(None), conn=Depends(get_db_connection)):
-    """Create a new rule or update if exists (logic simplified for MVP)."""
+@app.post("/api/rules", response_model=Rule, tags=["Rules"], summary="Create or Update Rule")
+def create_or_update_rule(
+    rule: RuleCreate, 
+    id: Optional[int] = Query(None, description="Provide ID to update an existing rule"), 
+    conn=Depends(get_db_connection)
+):
+    """Persist a new analysis rule or update an existing one based on the ID parameter."""
     # For MVP, we'll just Insert. Simple Create.
     # User said "Input saved in the back".
     with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
@@ -357,13 +396,141 @@ def create_or_update_rule(rule: RuleCreate, id: Optional[int] = Query(None), con
              raise HTTPException(status_code=404, detail="Rule not found")
         return dict(new_row)
 
-@app.delete("/api/rules/{rule_id}")
+@app.delete("/api/rules/{rule_id}", tags=["Rules"], summary="Delete Rule")
 def delete_rule(rule_id: int, conn=Depends(get_db_connection)):
-    """Delete a rule."""
+    """Remove a rule from the database permanently."""
     with conn.cursor() as cur:
         cur.execute("DELETE FROM saved_rules WHERE id = %s", (rule_id,))
         conn.commit()
     return {"status": "deleted", "id": rule_id}
+
+@app.post("/api/rules/execute", tags=["Rules"], summary="Execute Rule (ChatGPT)")
+def execute_rule(req: RuleExecuteRequest, conn=Depends(get_db_connection)):
+    """
+    Translates a natural language rule into SQL via ChatGPT and executes it.
+    Supports chaining by considering previous results in the prompt context.
+    Injects current application state (filters) into the prompt.
+    """
+    if not OPENAI_API_KEY:
+        return {
+            "status": "error", 
+            "message": "OpenAI API Key is missing. Please configure OPENAI_API_KEY in the environment."
+        }
+
+    # 1. Fetch Rule
+    with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+        cur.execute("SELECT instruction FROM saved_rules WHERE id = %s", (req.rule_id,))
+        rule_row = cur.fetchone()
+        if not rule_row:
+            raise HTTPException(status_code=404, detail="Rule not found")
+        
+        instruction = rule_row['instruction']
+
+    # 2. Fetch context (latest data sample matching filters if possible)
+    context_data = []
+    with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+        # We try to fetch some samples that match the current user filters to give relevant context
+        sample_query = "SELECT author, content, sentiment, keyword, received_at FROM kwatch_alert_results WHERE author != 'AutoModerator'"
+        sample_params = []
+        
+        kw_sql, kw_params = build_keyword_filter(req.keywords)
+        sample_query += kw_sql
+        sample_params.extend(kw_params)
+        
+        if req.start_date:
+            sample_query += " AND received_at >= %s"
+            sample_params.append(req.start_date)
+        if req.end_date:
+            sample_query += " AND received_at <= %s"
+            sample_params.append(req.end_date)
+            
+        sample_query += " ORDER BY received_at DESC LIMIT 10"
+        
+        cur.execute(sample_query, tuple(sample_params))
+        context_data = cur.fetchall()
+        # Convert datetimes for serializability
+        for r in context_data:
+            if r['received_at']: r['received_at'] = r['received_at'].isoformat()
+
+    # 3. Build Prompt
+    system_prompt = f"""
+    You are an expert Data Analyst and SQL Engineer for "Drug Experience Explorer" (DXE).
+    Target Database: PostgreSQL
+    Main Table: kwatch_alert_results
+    
+    Columns & Data Types:
+    - id (SERIAL): Primary Key
+    - date_text (TEXT): Original date string from source
+    - author (TEXT): Reddit username (Exclude 'AutoModerator')
+    - url (TEXT): Permalink to the post
+    - content (TEXT): The post body/text
+    - sentiment (TEXT): 'positive', 'negative', 'neutral'
+    - received_at (TIMESTAMP): When the data was ingested
+    - kwatch_query (TEXT): The alert query name
+    - keyword (TEXT): The drug keyword associated (e.g., 'Zepbound')
+
+    User's Current Application state:
+    - Selected Keywords: {req.keywords}
+    - Date Range: {req.start_date or 'Ever'} to {req.end_date or 'Now'}
+
+    Rules:
+    - Respond ONLY with a valid JSON object.
+    - If the instruction requires data retrieval, return: {{"type": "sql", "query": "SELECT ...", "explanation": "..."}}
+    - If the instruction is a direct question or metadata request, return: {{"type": "text", "content": "...", "explanation": "..."}}
+    - ALWAYS ensure SQL queries are valid PostgreSQL syntax.
+    - IMPORTANT: If writing SQL, ensure you use the context of 'Selected Keywords' and 'Date Range' if it makes sense for the user's request, but prioritize the 'Natural Language Rule' explicit instructions.
+    - Exclude bots (author != 'AutoModerator').
+    """
+    
+    user_prompt = f"Natural Language Rule: {instruction}\n\n"
+    
+    if req.previous_result:
+        # Truncate previous data if too large to avoid token limit issues
+        prev_data_sample = str(req.previous_result.get('data', []))[:2000]
+        user_prompt += f"Previous Rule Result Context (Chaining): {prev_data_sample}\n\n"
+    
+    user_prompt += f"Recent Data Context (Latest 10 samples matching current filters): {json.dumps(context_data)}\n\n"
+    user_prompt += "Target: Generate the SQL or textual analysis based on the rule."
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            response_format={ "type": "json_object" }
+        )
+        
+        gpt_raw = response.choices[0].message.content
+        gpt_res = json.loads(gpt_raw)
+        
+        if gpt_res.get("type") == "sql":
+            sql = gpt_res.get("query")
+            with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+                cur.execute(sql)
+                rows = cur.fetchall()
+                # Serialized datetimes for JSON response
+                for r in rows:
+                    for k, v in r.items():
+                        if isinstance(v, datetime):
+                            r[k] = v.isoformat()
+                return {
+                    "status": "success", 
+                    "data": rows, 
+                    "sql": sql, 
+                    "explanation": gpt_res.get("explanation")
+                }
+        else:
+            return {
+                "status": "success", 
+                "message": gpt_res.get("content"),
+                "explanation": gpt_res.get("explanation")
+            }
+
+    except Exception as e:
+        print(f"GPT/SQL Error: {e}")
+        return {"status": "error", "message": f"Execution failed: {str(e)}"}
 
 if __name__ == "__main__":
     import uvicorn

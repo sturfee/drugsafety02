@@ -2,22 +2,40 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { fetchKeywords, fetchMentions, fetchUniqueAuthors, fetchAuthors } from './services/api';
 import KeywordDropdown from './components/KeywordDropdown';
-import PostList from './components/PostList';
 import PostDetail from './components/PostDetail';
 import OutputPanel from './components/OutputPanel';
 import RulePanel from './components/RulePanel';
+import OutputWindow from './components/OutputWindow';
 import AuthorsList from './components/AuthorsList'; // New
 import ThemeSwitcher from './components/ThemeSwitcher';
 import { ThemeProvider } from './context/ThemeContext';
 import SourceDropdown from './components/SourceDropdown';
 import InfiniteScroll from './components/InfiniteScroll';
+import PostList from './components/PostList';
 
 const DEFAULT_KEYWORD = { label: 'All', count: 0 };
 
 function App() {
     const [keywords, setKeywords] = useState([DEFAULT_KEYWORD]);
-    const [selectedKeywords, setSelectedKeywords] = useState(['All']);
-    const [selectedSources, setSelectedSources] = useState(['reddit']);
+
+    // Persisted States
+    const [selectedKeywords, setSelectedKeywords] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dxe_v2_selectedKeywords');
+            return saved ? JSON.parse(saved) : ['All'];
+        } catch (e) {
+            return ['All'];
+        }
+    });
+
+    const [selectedSources, setSelectedSources] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dxe_v2_selectedSources');
+            return saved ? JSON.parse(saved) : ['reddit'];
+        } catch (e) {
+            return ['reddit'];
+        }
+    });
 
     // Lists Data
     const [mentions, setMentions] = useState([]);
@@ -32,8 +50,43 @@ function App() {
     const [authorsPage, setAuthorsPage] = useState(0);
     const [hasMoreAuthors, setHasMoreAuthors] = useState(true);
 
-    const [selectedPost, setSelectedPost] = useState(null);
-    const [activeListTab, setActiveListTab] = useState('mentions');
+    const [selectedPost, setSelectedPost] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dxe_v2_selectedPost');
+            return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+            return null;
+        }
+    });
+
+    const [activeListTab, setActiveListTab] = useState(() => {
+        const saved = localStorage.getItem('dxe_v2_activeListTab');
+        return saved || 'mentions';
+    });
+
+    const [activeRuleId, setActiveRuleId] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dxe_v2_activeRuleId');
+            return saved ? JSON.parse(saved) : null;
+        } catch (e) {
+            return null;
+        }
+    });
+
+    const [rules, setRules] = useState([]);
+
+    // Rule Execution State
+    const [ruleResults, setRuleResults] = useState({}); // Map: ruleId -> result
+    const [isExecutingRule, setIsExecutingRule] = useState(false);
+
+    // Persistence Effect
+    useEffect(() => {
+        localStorage.setItem('dxe_v2_selectedKeywords', JSON.stringify(selectedKeywords));
+        localStorage.setItem('dxe_v2_selectedSources', JSON.stringify(selectedSources));
+        localStorage.setItem('dxe_v2_activeListTab', activeListTab);
+        localStorage.setItem('dxe_v2_selectedPost', JSON.stringify(selectedPost));
+        localStorage.setItem('dxe_v2_activeRuleId', JSON.stringify(activeRuleId));
+    }, [selectedKeywords, selectedSources, activeListTab, selectedPost, activeRuleId]);
 
     // Initial Load: Keywords
     useEffect(() => {
@@ -150,17 +203,36 @@ function App() {
             <div className="app-container">
                 {/* Left Panel: Output & Rules */}
                 <div className="left-panel">
-                    {/* Top Left: Output (Empty Response Area) */}
+                    {/* Top Left: Output (Response Area) */}
                     <section className="panel output-section" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-                        <h2 style={{ marginBottom: '12px', fontSize: '1rem', flexShrink: 0 }}>Output</h2>
-                        <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-                            <OutputPanel />
+                        <div className="panel output-panel" style={{ flex: 1, minHeight: 0, padding: '16px', display: 'flex', flexDirection: 'column' }}>
+                            <OutputWindow
+                                result={ruleResults[activeRuleId]}
+                                isExecuting={isExecutingRule}
+                            />
                         </div>
                     </section>
 
                     {/* Bottom Left: Rules (Editable & Persisted) */}
                     <section className="panel rules-section" style={{ height: '400px', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-                        <RulePanel onApplyRule={(id) => console.log('Applying rule', id)} />
+                        <div className="panel rule-panel-container" style={{ flex: 1, minHeight: 0 }}>
+                            <RulePanel
+                                rules={rules}
+                                setRules={setRules}
+                                activeRuleId={activeRuleId}
+                                onActiveRuleChange={setActiveRuleId}
+                                onExecutionStart={() => setIsExecutingRule(true)}
+                                onExecutionComplete={(res) => {
+                                    setRuleResults(prev => ({
+                                        ...prev,
+                                        [activeRuleId]: res
+                                    }));
+                                    setIsExecutingRule(false);
+                                }}
+                                selectedKeywords={selectedKeywords}
+                                ruleResults={ruleResults} // Pass all results for chaining
+                            />
+                        </div>
                     </section>
                 </div>
 
