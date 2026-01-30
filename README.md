@@ -8,11 +8,14 @@ An AI-powered DSX workbench that listens to patient experiences shared across so
 
 ## Overview
 
-DSX is a tool for Subject Matter Experts (SMEs) to explore social-reported drug experiences to understand safety and performance. It allows SMEs to:
-- Explore patient reported drug experiences by keyword (e.g., Zepbound)
-- Analyze distribution of reports over time
+DSX is an AI-powered tool for Subject Matter Experts (SMEs) to explore medication experiences reported by patients (social, adverse events, insurance claims). 
+It is designed to enable SMEs to:
+- Explore patient reported drug experiences by keyword (e.g., Zepbound, Wegovy)
+- Analyze medication safety and effectiveness distribution over time
+- Monitor clinical or post-market medication surveillance for FDA reporting
 - Identify prior conditions and other medications used 
 - Generate safety and performance reports
+- Use insights for drug discovery and durg repurposing
 
 ## Live Demo (in development)
 
