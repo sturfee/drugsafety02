@@ -112,7 +112,6 @@ const OutputWindow = ({ result, isExecuting, onSelectPost, activeRuleId, activeR
     const { data, message, explanation } = result;
 
     return (
-    return (
         <div className="output-window" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{ paddingBottom: '12px', borderBottom: '1px solid var(--color-border)', marginBottom: '12px', flexShrink: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
