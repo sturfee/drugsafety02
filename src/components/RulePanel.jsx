@@ -59,6 +59,22 @@ const RulePanel = ({
         }
     }, [activeRuleId, rules]);
 
+    // Check for unsaved changes
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    useEffect(() => {
+        const active = rules.find(r => r.id === activeRuleId);
+        if (active) {
+            const isDirty =
+                localTitle !== active.title ||
+                localInstruction !== active.instruction ||
+                useChaining !== (active.is_chaining || false);
+            setHasUnsavedChanges(isDirty);
+        } else {
+            setHasUnsavedChanges(false);
+        }
+    }, [localTitle, localInstruction, useChaining, activeRuleId, rules]);
+
     // Handle Creating a New Rule
     const handleCreate = async () => {
         const tempRule = { title: "New Rule", instruction: "Enter instructions...", is_chaining: false };
@@ -86,6 +102,7 @@ const RulePanel = ({
             // Update local list
             setRules(prev => prev.map(r => r.id === activeRuleId ? updated : r));
             setIsSaving(false);
+            setHasUnsavedChanges(false);
         } catch (err) {
             alert("Failed to save changes");
             setIsSaving(false);
@@ -237,7 +254,7 @@ const RulePanel = ({
                                 <button
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    className="btn-save"
+                                    className={`btn-save ${hasUnsavedChanges ? 'dirty' : ''}`}
                                 >
                                     <Save size={16} /> {isSaving ? 'Saving...' : 'Save'}
                                 </button>
@@ -303,6 +320,7 @@ const RulePanel = ({
                         .btn-save {
                             background: var(--color-bg-panel);
                             border: 1px solid var(--color-border);
+                            color: var(--color-text-main);
                             padding: 8px 12px;
                             border-radius: var(--radius-sm);
                             cursor: pointer;
@@ -311,6 +329,17 @@ const RulePanel = ({
                             font-weight: 600;
                             font-size: 0.85rem;
                             align-items: center;
+                            transition: all 0.2s;
+                        }
+
+                        .btn-save.dirty {
+                            background: var(--color-primary); /* Blue */
+                            color: #000;
+                            border-color: var(--color-primary);
+                        }
+                        
+                        .btn-save:hover {
+                            opacity: 0.9;
                         }
 
                         .btn-delete {

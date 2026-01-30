@@ -523,8 +523,9 @@ def execute_rule(req: RuleExecuteRequest, conn=Depends(get_db_connection)):
             Goal: Analyze the input data based on the instruction and return a new JSON list.
             Rules:
             - Respond ONLY with a valid JSON object containing a key "result" which is the list of processed items.
+            - CRITICAL: You MUST preserve the 'id' field from the input for every item. Do not change, reformat, or generate new IDs. Use the exact ID from the input.
             - Do not include items that don't match criteria if the instruction implies filtering.
-            - Example Output: {"result": [{"author": "...", "weight_lost": 10}, ...]}
+            - Example Output: {"result": [{"id": 12345, "author": "...", "weight_lost": 10}, ...]}
             """
             
             # Truncate to safe size approx 30k chars to avoid hitting token limits
