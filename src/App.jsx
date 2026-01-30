@@ -209,6 +209,7 @@ function App() {
                             <OutputWindow
                                 result={ruleResults[activeRuleId]}
                                 isExecuting={isExecutingRule}
+                                onSelectPost={setSelectedPost}
                             />
                         </div>
                     </section>
