@@ -14,6 +14,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import SourceDropdown from './components/SourceDropdown';
 import InfiniteScroll from './components/InfiniteScroll';
 import PostList from './components/PostList';
+import Tutorial from './components/Tutorial';
 
 const DEFAULT_KEYWORD = { label: 'All', count: 0 };
 
@@ -228,7 +229,7 @@ function App() {
                 {/* Left Panel: Output & Rules */}
                 <div className="left-panel">
                     {/* Top Left: Output (Response Area) */}
-                    <section className="panel output-section" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                    <section className="panel output-section" id="step-output" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
                         <div className="panel output-panel" style={{ flex: 1, minHeight: 0, padding: '16px', display: 'flex', flexDirection: 'column' }}>
                             <OutputWindow
                                 result={ruleResults[activeRuleId]}
@@ -241,7 +242,7 @@ function App() {
                     </section>
 
                     {/* Bottom Left: Rules (Editable & Persisted) */}
-                    <section className="panel rules-section" style={{ height: '400px', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+                    <section className="panel rules-section" id="step-rules" style={{ height: '400px', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
                         <div className="panel rule-panel-container" style={{ flex: 1, minHeight: 0 }}>
                             <RulePanel
                                 rules={rules}
@@ -273,7 +274,7 @@ function App() {
                 <div className="right-panel">
 
                     {/* Top Right: Controls */}
-                    <section className="panel control-section">
+                    <section className="panel control-section" id="step-keywords">
                         <KeywordDropdown
                             keywords={keywords}
                             selectedKeywords={selectedKeywords}
@@ -287,7 +288,7 @@ function App() {
                     </section>
 
                     {/* Middle Right: Selected Post */}
-                    <section className="panel detail-section" style={{ position: 'relative' }}>
+                    <section className="panel detail-section" id="step-detail" style={{ position: 'relative' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                             <h3 style={{ margin: 0 }}>Selected Post</h3>
                             {selectedPost && (
@@ -352,7 +353,7 @@ function App() {
                     </section>
 
                     {/* Bottom Right: Tabs (Mentions / Authors) */}
-                    <section className="panel list-section" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <section className="panel list-section" id="step-posts" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                         {/* List Tabs */}
                         <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: '8px', flexShrink: 0 }}>
                             <button
@@ -411,6 +412,7 @@ function App() {
                     </section>
                 </div>
                 <ThemeSwitcher />
+                <Tutorial />
             </div>
         </div>
     );
