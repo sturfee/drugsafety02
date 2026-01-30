@@ -285,7 +285,7 @@ function App() {
                                 </button>
                             )}
                         </div>
-                        <div className={`post-detail-container ${isPostMaximized ? 'maximized' : ''}`} style={isPostMaximized ? {} : { height: '200px', background: 'var(--color-bg-panel)', borderRadius: 'var(--radius-sm)', padding: '8px', overflow: 'hidden' }}>
+                        <div className={`post-detail-container ${isPostMaximized ? 'maximized' : ''}`} style={isPostMaximized ? {} : { height: '200px', background: 'var(--color-bg-panel)', borderRadius: 'var(--radius-sm)', padding: '8px', overflowY: 'auto' }}>
                             {/* Close button for maximized view */}
                             {isPostMaximized && (
                                 <button
