@@ -63,6 +63,11 @@
     /* Backdrop */
     display: flex;
     flex-direction: column;
+    background-color: var(--color-bg-surface);
+    /* Fix for transparency */
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    /* Ensure content doesn't bleed */
 }
 
 .post-detail-container.maximized .post-detail-content {
