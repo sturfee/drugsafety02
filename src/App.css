@@ -140,7 +140,7 @@
         min-height: 300px;
     }
 
-    .detail-section div {
+    .detail-section .post-detail-container {
         height: auto !important;
         min-height: 150px;
     }

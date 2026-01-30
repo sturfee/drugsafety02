@@ -213,75 +213,156 @@ const RulePanel = ({
                     </div>
 
                     {/* Footer Actions */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginRight: '12px' }}>
+                    <div className="rule-footer">
+                        <div className="rule-options">
+                            <div className="chaining-toggle">
                                 <input
                                     type="checkbox"
                                     id="chaining-toggle"
                                     checked={useChaining}
                                     onChange={(e) => setUseChaining(e.target.checked)}
-                                    style={{ cursor: 'pointer' }}
                                 />
-                                <label htmlFor="chaining-toggle" style={{ fontSize: '0.8rem', color: 'var(--color-text-subtle)', cursor: 'pointer', userSelect: 'none' }}>
+                                <label htmlFor="chaining-toggle">
                                     Use previous result as context (Chaining)
                                 </label>
                             </div>
-                            <div style={{ display: 'flex', gap: '8px' }}>
+
+                            <div className="edit-actions">
                                 <button
                                     onClick={handleSave}
                                     disabled={isSaving}
-                                    style={{
-                                        background: 'var(--color-bg-panel)',
-                                        border: '1px solid var(--color-border)',
-                                        padding: '8px 12px',
-                                        borderRadius: 'var(--radius-sm)',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        gap: '6px',
-                                        fontWeight: 600,
-                                        fontSize: '0.85rem'
-                                    }}
+                                    className="btn-save"
                                 >
                                     <Save size={16} /> {isSaving ? 'Saving...' : 'Save'}
                                 </button>
                                 <button
                                     onClick={handleDelete}
-                                    style={{
-                                        background: 'transparent',
-                                        border: 'none',
-                                        color: 'var(--color-danger)',
-                                        padding: '8px',
-                                        cursor: 'pointer'
-                                    }}
+                                    className="btn-delete"
                                 >
                                     <Trash2 size={18} />
                                 </button>
                             </div>
-
-                            <button
-                                onClick={handleExecute}
-                                disabled={!!executingId}
-                                style={{
-                                    background: executingId ? 'var(--color-text-subtle)' : '#000',
-                                    color: '#FFF',
-                                    border: 'none',
-                                    padding: '10px 24px',
-                                    borderRadius: 'var(--radius-sm)',
-                                    fontWeight: 600,
-                                    fontSize: '0.9rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    cursor: executingId ? 'not-allowed' : 'pointer',
-                                    boxShadow: 'var(--shadow-md)'
-                                }}
-                            >
-                                <Play size={16} fill="#FFF" /> {executingId ? 'Executing...' : 'Apply Rule'}
-                            </button>
                         </div>
 
+                        <button
+                            onClick={handleExecute}
+                            disabled={!!executingId}
+                            className={`btn-execute ${executingId ? 'executing' : ''}`}
+                        >
+                            <Play size={16} fill="#FFF" /> {executingId ? 'Executing...' : 'Apply Rule'}
+                        </button>
                     </div>
+
+                    <style>{`
+                        .rule-footer {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-top: 16px;
+                            gap: 12px;
+                            flex-wrap: wrap;
+                        }
+                        
+                        .rule-options {
+                            display: flex;
+                            align-items: center;
+                            gap: 16px;
+                            flex-wrap: wrap;
+                        }
+
+                        .chaining-toggle {
+                            display: flex;
+                            align-items: center;
+                            gap: 6px;
+                        }
+                        
+                        .chaining-toggle label {
+                            font-size: 0.8rem;
+                            color: var(--color-text-subtle);
+                            cursor: pointer;
+                            user-select: none;
+                        }
+                        
+                        .chaining-toggle input {
+                            cursor: pointer;
+                            width: 16px;
+                            height: 16px;
+                        }
+
+                        .edit-actions {
+                            display: flex;
+                            gap: 8px;
+                        }
+
+                        .btn-save {
+                            background: var(--color-bg-panel);
+                            border: 1px solid var(--color-border);
+                            padding: 8px 12px;
+                            border-radius: var(--radius-sm);
+                            cursor: pointer;
+                            display: flex;
+                            gap: 6px;
+                            font-weight: 600;
+                            font-size: 0.85rem;
+                            align-items: center;
+                        }
+
+                        .btn-delete {
+                            background: transparent;
+                            border: none;
+                            color: var(--color-danger);
+                            padding: 8px;
+                            cursor: pointer;
+                        }
+
+                        .btn-execute {
+                            background: #000;
+                            color: #FFF;
+                            border: none;
+                            padding: 10px 24px;
+                            border-radius: var(--radius-sm);
+                            font-weight: 600;
+                            font-size: 0.9rem;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            cursor: pointer;
+                            box-shadow: var(--shadow-md);
+                            white-space: nowrap;
+                        }
+
+                        .btn-execute.executing {
+                            background: var(--color-text-subtle);
+                            cursor: not-allowed;
+                        }
+
+                        /* Mobile Styles */
+                        @media (max-width: 768px) {
+                            .rule-footer {
+                                flex-direction: column;
+                                align-items: stretch;
+                            }
+                            
+                            .rule-options {
+                                flex-direction: column;
+                                align-items: stretch;
+                                gap: 12px;
+                            }
+                            
+                            .chaining-toggle {
+                                justify-content: flex-start;
+                            }
+
+                            .edit-actions {
+                                justify-content: flex-end;
+                            }
+                            
+                            .btn-execute {
+                                justify-content: center;
+                                width: 100%;
+                            }
+                        }
+                    `}</style>
                 </div>
             ) : (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-subtle)' }}>

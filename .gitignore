@@ -8,3 +8,5 @@ __pycache__
 backend_test_log.txt
 frontend_test_log.txt
 node_modules
+api.log
+.agent/

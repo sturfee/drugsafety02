@@ -193,10 +193,7 @@ function App() {
                 </div>
                 <div className="header-right">
                     <span className="powered-by">Workbench powered by DeK</span>
-                    <nav className="header-nav">
-                        <span>Login</span>
-                        <span>Signup</span>
-                    </nav>
+
                 </div>
             </header>
 
@@ -256,7 +253,7 @@ function App() {
                     {/* Middle Right: Selected Post */}
                     <section className="panel detail-section">
                         <h3>Selected Post</h3>
-                        <div style={{ height: '200px', background: 'var(--color-bg-panel)', borderRadius: 'var(--radius-sm)', padding: '8px', overflow: 'hidden' }}>
+                        <div className="post-detail-container" style={{ height: '200px', background: 'var(--color-bg-panel)', borderRadius: 'var(--radius-sm)', padding: '8px', overflow: 'hidden' }}>
                             <PostDetail post={selectedPost} selectedKeywords={selectedKeywords} />
                         </div>
                     </section>
