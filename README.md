@@ -4,7 +4,7 @@
 
 An AI-powered DSX workbench that listens to patient experiences shared across social channels, FDA adverse event reports, and de-identified pharmacy and medical claims to generate deep, actionable insights on drug performance and safety. A must-have AI tool for pharmaceutical companies developing, manufacturing, and distributing medications.
 
-![Dashboard Preview](assets/dashboard_new.pn
+![Dashboard Preview](assets/dashboard_new.png)
 
 ## Overview
 
