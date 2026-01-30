@@ -235,6 +235,7 @@ function App() {
                                 isExecuting={isExecutingRule}
                                 onSelectPost={handleSelectPostFromOutput}
                                 activeRuleId={activeRuleId}
+                                activeRuleTitle={rules.find(r => r.id === activeRuleId)?.title}
                             />
                         </div>
                     </section>

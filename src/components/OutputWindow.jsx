@@ -1,7 +1,7 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 
-const OutputWindow = ({ result, isExecuting, onSelectPost, activeRuleId }) => {
+const OutputWindow = ({ result, isExecuting, onSelectPost, activeRuleId, activeRuleTitle }) => {
 
     // Function to convert JSON to CSV and trigger download
     const handleDownloadCSV = () => {
@@ -19,9 +19,17 @@ const OutputWindow = ({ result, isExecuting, onSelectPost, activeRuleId }) => {
             }).join(','))
         ].join('\n');
 
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const rulePart = activeRuleId ? `step-${activeRuleId}` : 'output';
-        const filename = `${rulePart}-${timestamp}.csv`;
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        const mm = pad(now.getMonth() + 1);
+        const dd = pad(now.getDate());
+        const yy = String(now.getFullYear()).slice(-2);
+        const hour = pad(now.getHours());
+        const min = pad(now.getMinutes());
+        const sec = pad(now.getSeconds());
+
+        const titlePart = (activeRuleTitle || `step-${activeRuleId || 'unknown'}`).replace(/[^a-zA-Z0-9-_]/g, '_');
+        const filename = `${titlePart}_${mm}_${dd}_${yy}_${hour}_${min}_${sec}.csv`;
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);

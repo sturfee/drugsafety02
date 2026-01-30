@@ -97,6 +97,7 @@ class AuthorStat(BaseModel):
 class RuleCreate(BaseModel):
     title: str
     instruction: str
+    is_chaining: Optional[bool] = False
 
 class Rule(RuleCreate):
     id: int
@@ -123,6 +124,7 @@ def init_db():
         return
     try:
         with conn.cursor() as cur:
+            # Create table if not exists
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS saved_rules (
                     id SERIAL PRIMARY KEY,
@@ -131,6 +133,16 @@ def init_db():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
+            
+            # Add is_chaining column if it doesn't exist (Migration)
+            try:
+                cur.execute("ALTER TABLE saved_rules ADD COLUMN is_chaining BOOLEAN DEFAULT FALSE;")
+            except Exception:
+                conn.rollback() # Column likely exists or other error
+            else:
+                conn.commit()
+                print("Added column 'is_chaining' to saved_rules.")
+
             conn.commit()
             print("Table 'saved_rules' checked/created.")
     except Exception as e:
@@ -385,7 +397,7 @@ def get_sentiment_groups(
 def get_rules(conn=Depends(get_db_connection)):
     """Fetch all persisted user analysis rules."""
     with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-        cur.execute("SELECT id, title, instruction, created_at FROM saved_rules ORDER BY id ASC")
+        cur.execute("SELECT id, title, instruction, is_chaining, created_at FROM saved_rules ORDER BY id ASC")
         rows = cur.fetchall()
         return [dict(row) for row in rows]
 
@@ -402,14 +414,14 @@ def create_or_update_rule(
         if id:
             # Update
             cur.execute(
-                "UPDATE saved_rules SET title = %s, instruction = %s WHERE id = %s RETURNING id, title, instruction, created_at",
-                (rule.title, rule.instruction, id)
+                "UPDATE saved_rules SET title = %s, instruction = %s, is_chaining = %s WHERE id = %s RETURNING id, title, instruction, is_chaining, created_at",
+                (rule.title, rule.instruction, rule.is_chaining, id)
             )
         else:
             # Create
             cur.execute(
-                "INSERT INTO saved_rules (title, instruction) VALUES (%s, %s) RETURNING id, title, instruction, created_at",
-                (rule.title, rule.instruction)
+                "INSERT INTO saved_rules (title, instruction, is_chaining) VALUES (%s, %s, %s) RETURNING id, title, instruction, is_chaining, created_at",
+                (rule.title, rule.instruction, rule.is_chaining)
             )
         conn.commit()
         new_row = cur.fetchone()

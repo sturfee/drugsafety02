@@ -51,15 +51,17 @@ const RulePanel = ({
         if (active) {
             setLocalTitle(active.title);
             setLocalInstruction(active.instruction);
+            setUseChaining(active.is_chaining || false);
         } else {
             setLocalTitle('');
             setLocalInstruction('');
+            setUseChaining(false);
         }
     }, [activeRuleId, rules]);
 
     // Handle Creating a New Rule
     const handleCreate = async () => {
-        const tempRule = { title: "New Rule", instruction: "Enter instructions..." };
+        const tempRule = { title: "New Rule", instruction: "Enter instructions...", is_chaining: false };
         try {
             const saved = await saveRule(tempRule);
             setRules(prev => [...prev, saved]);
@@ -74,7 +76,11 @@ const RulePanel = ({
         if (!activeRuleId) return;
         setIsSaving(true);
         try {
-            const payload = { title: localTitle, instruction: localInstruction };
+            const payload = {
+                title: localTitle,
+                instruction: localInstruction,
+                is_chaining: useChaining
+            };
             const updated = await saveRule(payload, activeRuleId);
 
             // Update local list
