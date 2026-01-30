@@ -1,8 +1,10 @@
-# drug-safety-explorer (DXE)
+# Pharmacovigilance Workbench
 
-Social pharmacovigilance signal exploration UI.
+**Drug Safety and Performance insights directly from Patient Experience**
 
-![Dashboard Preview](assets/dashboard_preview.png)
+AI-powered workbench that listens to patient experience shared over social channels, adverse event reports submitted to FDA, de-identified pharmacy and medical claims to generate deep insights about drugs. A must needed tool for pharmaceutical companies manufacturing and distributing medications.
+
+![Dashboard Preview](assets/dashboard_new.png)
 
 ## Overview
 
