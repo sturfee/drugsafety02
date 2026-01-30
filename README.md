@@ -28,7 +28,7 @@ It is designed to enable SMEs to:
 ![DsX-Architecture](https://github.com/user-attachments/assets/6b103dfc-a0f7-4696-835a-f8d23bd69689)
 
 ## API
-The API documentation (Swagger UI) is available at (https://54-175-252-15.nip.io/api/docs)[https://54-175-252-15.nip.io/api/docs]
+The API documentation (Swagger UI) is available at (https://54-175-252-15.nip.io/api/docs)
 ## Technology Stack
 - **Frontend**: React (Vite)
 - **Backend**: Python (FastAPI, WebHook)
