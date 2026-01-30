@@ -1,4 +1,4 @@
-# Drug-Safety-Explorer [DSX]
+# Drug-Safety-Explorer [DSX]
 
 **Drug safety and performance insights directly from patient experience**
 
