@@ -152,7 +152,7 @@ if db_pool:
 
 # --- Endpoints ---
 
-@app.get("/health", tags=["Core"], summary="Health Check")
+@app.get("/api/health", tags=["Core"], summary="Health Check")
 def health_check():
     """Verify that the API service is alive and healthy."""
     return {"status": "ok"}
@@ -439,7 +439,7 @@ def execute_rule(req: RuleExecuteRequest, conn=Depends(get_db_connection)):
     try:
         # --- \READ MODE ---
         if mode == "read":
-            system_prompt = """
+            system_prompt = r"""
             You are a SQL Engineer for 'Drug Experience Explorer'.
             Target Database: PostgreSQL. Table: kwatch_alert_results
             Columns: id, author, content, sentiment, received_at, keyword, url
@@ -481,9 +481,9 @@ def execute_rule(req: RuleExecuteRequest, conn=Depends(get_db_connection)):
                 input_data = req.previous_result.get("data")
             
             if not input_data:
-                return {"status": "error", "message": "No input data found for \Process. Chain this rule after a \Read rule."}
+                return {"status": "error", "message": r"No input data found for \Process. Chain this rule after a \Read rule."}
 
-            system_prompt = """
+            system_prompt = r"""
             You are a Data Analyst processing raw social media data.
             Input: A JSON list of posts.
             Instruction: A processing rule starting with \Process.
