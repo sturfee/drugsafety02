@@ -192,11 +192,11 @@ function App() {
         <div className="main-wrapper">
             <header className="app-header">
                 <div className="header-top">
-                    <h1>Drug-Safety-Explorer - DSX</h1>
+                    <h1>Drug-Safety-Explorer <span style={{ color: '#60A5FA' }}>[DSX]</span></h1>
                 </div>
                 <div className="header-bottom">
                     <p>Drug safety and performance insights directly from patient experience</p>
-                    <span className="powered-by">DSX Workbench powered by K</span>
+                    <span className="powered-by"><span style={{ color: '#60A5FA' }}>DSX</span> Workbench powered by K</span>
                 </div>
             </header>
 
