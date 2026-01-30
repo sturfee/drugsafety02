@@ -6,6 +6,8 @@ An AI-powered DSX workbench that listens to patient experiences shared across so
 
 ![Dashboard Preview](assets/dashboard_v2.png)
 
+![https://youtu.be/GelhO3k6O1M]
+
 ## Overview
 
 DSX is an AI-powered tool for Subject Matter Experts (SMEs) to explore medication experiences reported by patients (social, adverse events, insurance claims). 
