@@ -8,18 +8,24 @@ An AI-powered DSX workbench that listens to patient experiences shared across so
 
 ## Overview
 
-DXE is a tool for Subject Matter Experts (SMEs) to explore social-reported drug experiences. It allows users to:
-- Explore mentions by keyword (e.g., Zepbound)
-- Analyze sentiment distribution over time
-- Identify repeat authors and recurring topics
-- Create and execute reproducible analysis rules
+DSX is a tool for Subject Matter Experts (SMEs) to explore social-reported drug experiences to understand safety and performance. It allows SMEs to:
+- Explore patient reported drug experiences by keyword (e.g., Zepbound)
+- Analyze distribution of reports over time
+- Identify prior conditions and other medications used 
+- Generate safety and performance reports
 
-## Live Demo
+## Live Demo (in development)
 
 [https://54-175-252-15.nip.io/](https://54-175-252-15.nip.io/)
+
+## Architecture Overview (in development, only Reddit social channel implemented)
+![DSX-Architecture](https://github.com/user-attachments/assets/e7962f8e-2938-4dc4-8391-dce1f91a2a0b)
+
 
 ## Technology Stack
 
 - **Frontend**: React (Vite)
 - **Backend**: Python (FastAPI)
 - **Database**: PostgreSQL (RDS)
+- **AI: chatGPT-4o
+- **Automation: Kognitos (To be implemented)
