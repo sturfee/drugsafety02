@@ -99,3 +99,9 @@ export const executeRule = async (ruleId, keywords = ['All'], startDate = null, 
     if (!res.ok) throw new Error("Failed to execute rule");
     return res.json();
 };
+
+export const fetchMentionById = async (id) => {
+    const res = await fetch(`${API_BASE_URL}/api/mentions/${id}`);
+    if (!res.ok) throw new Error("Failed to fetch mention");
+    return res.json();
+};
