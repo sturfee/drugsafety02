@@ -58,6 +58,32 @@ const PostDetail = ({ post, selectedKeywords = [] }) => {
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0', lineHeight: '1.5', fontSize: '0.95rem' }}>
+
+                {/* Extracted Fields Highlight Section */}
+                {post.extractedData && (
+                    <div style={{ marginBottom: '12px', padding: '8px', background: 'rgba(96, 165, 250, 0.1)', borderRadius: '4px', borderLeft: '3px solid #60A5FA' }}>
+                        <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#60A5FA', fontWeight: 700, marginBottom: '4px' }}>
+                            Reported Fields
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 'x 12px', rowGap: '4px' }}>
+                            {Object.entries(post.extractedData).map(([key, val]) => {
+                                // Filter out standard fields to focus on extracted insights
+                                if (['id', 'post_id', 'content', 'url', 'date', 'received_at', 'source', 'sentiment', 'c', 'keyword'].includes(key.toLowerCase())) return null;
+                                return (
+                                    <React.Fragment key={key}>
+                                        <div style={{ fontWeight: 600, color: '#60A5FA', fontSize: '0.85rem', textTransform: 'capitalize' }}>
+                                            {key.replace(/_/g, ' ')}:
+                                        </div>
+                                        <div style={{ wordBreak: 'break-word', fontSize: '0.85rem' }}>
+                                            {String(val)}
+                                        </div>
+                                    </React.Fragment>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
                 {highlightKeywords(post.content)}
             </div>
 
