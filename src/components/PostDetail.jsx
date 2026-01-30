@@ -116,7 +116,7 @@ const PostDetail = ({ post, selectedKeywords = [] }) => {
                     </div>
                 )}
 
-                {highlightKeywords(post.content)}
+                {highlightContent(post.content)}
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--color-text-subtle)', borderTop: '1px solid var(--color-border)', paddingTop: '8px' }}>
