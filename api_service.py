@@ -407,9 +407,8 @@ def delete_rule(rule_id: int, conn=Depends(get_db_connection)):
 @app.post("/api/rules/execute", tags=["Rules"], summary="Execute Rule (ChatGPT)")
 def execute_rule(req: RuleExecuteRequest, conn=Depends(get_db_connection)):
     """
-    Translates a natural language rule into SQL via ChatGPT and executes it.
-    Supports chaining by considering previous results in the prompt context.
-    Injects current application state (filters) into the prompt.
+    Executes a rule based on its instruction type (\Read, \Process, \Show).
+    Falls back to generic interpretation if no prefix is found.
     """
     if not OPENAI_API_KEY:
         return {
@@ -424,112 +423,156 @@ def execute_rule(req: RuleExecuteRequest, conn=Depends(get_db_connection)):
         if not rule_row:
             raise HTTPException(status_code=404, detail="Rule not found")
         
-        instruction = rule_row['instruction']
+        instruction = rule_row['instruction'].strip()
 
-    # 2. Fetch context (latest data sample matching filters if possible)
-    context_data = []
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
-        # We try to fetch some samples that match the current user filters to give relevant context
-        sample_query = "SELECT author, content, sentiment, keyword, received_at FROM kwatch_alert_results WHERE author != 'AutoModerator'"
-        sample_params = []
-        
-        kw_sql, kw_params = build_keyword_filter(req.keywords)
-        sample_query += kw_sql
-        sample_params.extend(kw_params)
-        
-        if req.start_date:
-            sample_query += " AND received_at >= %s"
-            sample_params.append(req.start_date)
-        if req.end_date:
-            sample_query += " AND received_at <= %s"
-            sample_params.append(req.end_date)
-            
-        sample_query += " ORDER BY received_at DESC LIMIT 10"
-        
-        cur.execute(sample_query, tuple(sample_params))
-        context_data = cur.fetchall()
-        # Convert datetimes for serializability
-        for r in context_data:
-            if r['received_at']: r['received_at'] = r['received_at'].isoformat()
+    # Determine Mode
+    mode = "generic"
+    if instruction.lower().startswith(r"\read"):
+        mode = "read"
+    elif instruction.lower().startswith(r"\process"):
+        mode = "process"
+    elif instruction.lower().startswith(r"\show"):
+        mode = "show"
 
-    # 3. Build Prompt
-    system_prompt = f"""
-    You are an expert Data Analyst and SQL Engineer for "Drug Experience Explorer" (DXE).
-    Target Database: PostgreSQL
-    Main Table: kwatch_alert_results
-    
-    Columns & Data Types:
-    - id (SERIAL): Primary Key
-    - date_text (TEXT): Original date string from source
-    - author (TEXT): Reddit username (Exclude 'AutoModerator')
-    - url (TEXT): Permalink to the post
-    - content (TEXT): The post body/text
-    - sentiment (TEXT): 'positive', 'negative', 'neutral'
-    - received_at (TIMESTAMP): When the data was ingested
-    - kwatch_query (TEXT): The alert query name
-    - keyword (TEXT): The drug keyword associated (e.g., 'Zepbound')
-
-    User's Current Application state:
-    - Selected Keywords: {req.keywords}
-    - Date Range: {req.start_date or 'Ever'} to {req.end_date or 'Now'}
-
-    Rules:
-    - Respond ONLY with a valid JSON object.
-    - If the instruction requires data retrieval, return: {{"type": "sql", "query": "SELECT ...", "explanation": "..."}}
-    - If the instruction is a direct question or metadata request, return: {{"type": "text", "content": "...", "explanation": "..."}}
-    - ALWAYS ensure SQL queries are valid PostgreSQL syntax.
-    - IMPORTANT: If writing SQL, ensure you use the context of 'Selected Keywords' and 'Date Range' if it makes sense for the user's request, but prioritize the 'Natural Language Rule' explicit instructions.
-    - Exclude bots (author != 'AutoModerator').
-    """
-    
-    user_prompt = f"Natural Language Rule: {instruction}\n\n"
-    
-    if req.previous_result:
-        # Truncate previous data if too large to avoid token limit issues
-        prev_data_sample = str(req.previous_result.get('data', []))[:2000]
-        user_prompt += f"Previous Rule Result Context (Chaining): {prev_data_sample}\n\n"
-    
-    user_prompt += f"Recent Data Context (Latest 10 samples matching current filters): {json.dumps(context_data)}\n\n"
-    user_prompt += "Target: Generate the SQL or textual analysis based on the rule."
+    print(f"Executing Rule {req.rule_id} in mode: {mode}")
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            response_format={ "type": "json_object" }
-        )
-        
-        gpt_raw = response.choices[0].message.content
-        gpt_res = json.loads(gpt_raw)
-        
-        if gpt_res.get("type") == "sql":
+        # --- \READ MODE ---
+        if mode == "read":
+            system_prompt = """
+            You are a SQL Engineer for 'Drug Experience Explorer'.
+            Target Database: PostgreSQL. Table: kwatch_alert_results
+            Columns: id, author, content, sentiment, received_at, keyword, url
+            Goal: Convert the user's natural language request (starting with \Read) into a valid PostgreSQL SELECT query.
+            Rules:
+            - Respond ONLY with a valid JSON object: {"query": "SELECT ...", "explanation": "..."}
+            - Do not output markdown.
+            - Filter autogenerated content: author != 'AutoModerator'
+            - Use LIMIT if specified, otherwise default to 50.
+            """
+            
+            user_prompt = f"Instruction: {instruction}\n"
+            if req.keywords and "All" not in req.keywords:
+                user_prompt += f"Context: Focus on keywords {req.keywords}\n"
+
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
+                response_format={ "type": "json_object" }
+            )
+            gpt_res = json.loads(response.choices[0].message.content)
             sql = gpt_res.get("query")
+            
             with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
                 cur.execute(sql)
                 rows = cur.fetchall()
-                # Serialized datetimes for JSON response
+                # Serialize dates
                 for r in rows:
                     for k, v in r.items():
                         if isinstance(v, datetime):
                             r[k] = v.isoformat()
-                return {
-                    "status": "success", 
-                    "data": rows, 
-                    "sql": sql, 
-                    "explanation": gpt_res.get("explanation")
-                }
-        else:
+                return {"status": "success", "type": "read", "data": rows, "sql": sql, "explanation": gpt_res.get("explanation")}
+
+        # --- \PROCESS MODE ---
+        elif mode == "process":
+            # Requires chaining
+            input_data = []
+            if req.previous_result and req.previous_result.get("data"):
+                input_data = req.previous_result.get("data")
+            
+            if not input_data:
+                return {"status": "error", "message": "No input data found for \Process. Chain this rule after a \Read rule."}
+
+            system_prompt = """
+            You are a Data Analyst processing raw social media data.
+            Input: A JSON list of posts.
+            Instruction: A processing rule starting with \Process.
+            Goal: Analyze the input data based on the instruction and return a new JSON list.
+            Rules:
+            - Respond ONLY with a valid JSON object containing a key "result" which is the list of processed items.
+            - Do not include items that don't match criteria if the instruction implies filtering.
+            - Example Output: {"result": [{"author": "...", "weight_lost": 10}, ...]}
+            """
+            
+            # Truncate to safe size approx 30k chars to avoid hitting token limits
+            data_str = json.dumps(input_data)[:30000]
+
+            user_prompt = f"Instruction: {instruction}\n\nInput Data (Truncated if too large):\n{data_str}"
+
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
+                response_format={ "type": "json_object" }
+            )
+            gpt_res = json.loads(response.choices[0].message.content)
+            processed_data = gpt_res.get("result", [])
+            return {"status": "success", "type": "process", "data": processed_data}
+
+        # --- \SHOW MODE ---
+        elif mode == "show":
+            # Pass-through or formatting
+            if not req.previous_result:
+                return {"status": "error", "message": "No data to show."}
+            
+            # In the future, this could ask GPT to format as HTML table etc, but for now we just pass data
             return {
                 "status": "success", 
-                "message": gpt_res.get("content"),
-                "explanation": gpt_res.get("explanation")
+                "type": "show", 
+                "data": req.previous_result.get("data", []),
+                "message": "Data passed through for display."
             }
 
+        # --- GENERIC / FALLBACK MODE ---
+        else:
+            # Fallback to the original mixed logic
+            context_data = []
+            with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+                sample_query = "SELECT author, content, sentiment, keyword, received_at FROM kwatch_alert_results WHERE author != 'AutoModerator' ORDER BY received_at DESC LIMIT 5"
+                cur.execute(sample_query)
+                context_data = cur.fetchall()
+                for r in context_data:
+                    if r['received_at']: r['received_at'] = r['received_at'].isoformat()
+
+            system_prompt = f"""
+            You are an expert Data Analyst and SQL Engineer for "Drug Experience Explorer" (DXE).
+            Target Database: PostgreSQL. Table: kwatch_alert_results
+            Columns: id, date_text, author, url, content, sentiment, received_at, kwatch_query, keyword
+            User's Current Application state: Selected Keywords: {req.keywords}
+            Rules:
+            - Respond ONLY with a valid JSON object.
+            - If instruction requires data retrieval, return: {{"type": "sql", "query": "SELECT ...", "explanation": "..."}}
+            - If instruction is analysis/text, return: {{"type": "text", "content": "...", "explanation": "..."}}
+            """
+            
+            user_prompt = f"Natural Language Rule: {instruction}\n\n"
+            if req.previous_result:
+                user_prompt += f"Previous context: {str(req.previous_result.get('data', []))[:1000]}\n"
+            
+            user_prompt += f"Recent Data Sample: {json.dumps(context_data)}\n"
+
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
+                response_format={ "type": "json_object" }
+            )
+            
+            gpt_res = json.loads(response.choices[0].message.content)
+            
+            if gpt_res.get("type") == "sql":
+                sql = gpt_res.get("query")
+                with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+                    cur.execute(sql)
+                    rows = cur.fetchall()
+                    for r in rows:
+                        for k, v in r.items():
+                            if isinstance(v, datetime):
+                                r[k] = v.isoformat()
+                    return {"status": "success", "data": rows, "sql": sql, "explanation": gpt_res.get("explanation")}
+            else:
+                return {"status": "success", "message": gpt_res.get("content"), "explanation": gpt_res.get("explanation")}
+
     except Exception as e:
-        print(f"GPT/SQL Error: {e}")
+        print(f"GPT/SQL Execution Error: {e}")
         return {"status": "error", "message": f"Execution failed: {str(e)}"}
 
 if __name__ == "__main__":
