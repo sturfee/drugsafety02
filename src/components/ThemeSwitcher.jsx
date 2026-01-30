@@ -8,7 +8,8 @@ const ThemeSwitcher = () => {
 
     const themes = [
         { id: 'enterprise', label: '🏢 Enterprise' },
-        { id: 'boxy', label: '🟡 Boxy' }
+        { id: 'boxy', label: '🟡 Boxy' },
+        { id: 'pharma', label: '🏥 Pharma' }
     ];
 
     return (

@@ -76,3 +76,37 @@
   --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --backdrop-filter: none;
 }
+
+/* --- Pharma (Lilly Style) Theme --- */
+[data-theme="pharma"] {
+  --color-primary: #D31710;
+  /* Lilly Red */
+  --color-primary-dark: #A50F0A;
+  --color-secondary: #007A55;
+  /* Accent Green */
+
+  --color-bg-app: #FBF5F4;
+  /* Light Beige/Pink tint */
+  --color-bg-surface: #ffffff;
+  --color-bg-panel: #F2EBEA;
+
+  --color-text-main: #191919;
+  --color-text-subtle: #666666;
+  --color-border: #E3E3E3;
+
+  --color-glass-border: rgba(211, 23, 16, 0.1);
+  --color-glass-bg: rgba(255, 255, 255, 0.95);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 24px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(211, 23, 16, 0.08);
+  /* Red-tinted shadow */
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  --font-sans: 'Ringside Sans', 'Segoe UI', system-ui, sans-serif;
+  --backdrop-filter: saturate(120%);
+}
