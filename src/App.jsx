@@ -248,7 +248,13 @@ function App() {
                                 setRules={setRules}
                                 activeRuleId={activeRuleId}
                                 onActiveRuleChange={setActiveRuleId}
-                                onExecutionStart={() => setIsExecutingRule(true)}
+                                onExecutionStart={() => {
+                                    setIsExecutingRule(true);
+                                    setRuleResults(prev => ({
+                                        ...prev,
+                                        [activeRuleId]: null // Clear previous result for clean state
+                                    }));
+                                }}
                                 onExecutionComplete={(res) => {
                                     setRuleResults(prev => ({
                                         ...prev,
