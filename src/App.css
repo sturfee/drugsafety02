@@ -56,7 +56,10 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 90vw;
-    height: 90vh !important;
+    height: auto !important;
+    /* Fit content */
+    max-height: 90vh;
+    /* Cap at 90% view height */
     /* Override inline height */
     z-index: 9999;
     box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
