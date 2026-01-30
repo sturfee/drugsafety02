@@ -88,6 +88,10 @@ function App() {
         localStorage.setItem('dxe_v2_activeRuleId', JSON.stringify(activeRuleId));
     }, [selectedKeywords, selectedSources, activeListTab, selectedPost, activeRuleId]);
 
+
+    // Maximized State
+    const [isPostMaximized, setIsPostMaximized] = useState(false);
+
     // Initial Load: Keywords
     useEffect(() => {
         fetchKeywords()
@@ -187,13 +191,12 @@ function App() {
     return (
         <div className="main-wrapper">
             <header className="app-header">
-                <div className="header-left">
-                    <h1>K Pharmacovigilance</h1>
-                    <p>Drug performance and safety insights from patient experience</p>
+                <div className="header-top">
+                    <h1>Drug-Safety-Explorer - DSX</h1>
                 </div>
-                <div className="header-right">
-                    <span className="powered-by">Workbench powered by DeK</span>
-
+                <div className="header-bottom">
+                    <p>Drug safety and performance insights directly from patient experience</p>
+                    <span className="powered-by">DSX Workbench powered by K</span>
                 </div>
             </header>
 
@@ -251,10 +254,67 @@ function App() {
                     </section>
 
                     {/* Middle Right: Selected Post */}
-                    <section className="panel detail-section">
-                        <h3>Selected Post</h3>
-                        <div className="post-detail-container" style={{ height: '200px', background: 'var(--color-bg-panel)', borderRadius: 'var(--radius-sm)', padding: '8px', overflow: 'hidden' }}>
-                            <PostDetail post={selectedPost} selectedKeywords={selectedKeywords} />
+                    <section className="panel detail-section" style={{ position: 'relative' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <h3 style={{ margin: 0 }}>Selected Post</h3>
+                            {selectedPost && (
+                                <button
+                                    onClick={() => setIsPostMaximized(!isPostMaximized)}
+                                    title={isPostMaximized ? "Minimize" : "Maximize"}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        padding: '4px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        color: 'var(--color-text-secondary)'
+                                    }}
+                                >
+                                    {isPostMaximized ? (
+                                        // Minimize Icon
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+                                        </svg>
+                                    ) : (
+                                        // Maximize Icon
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+                                        </svg>
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                        <div className={`post-detail-container ${isPostMaximized ? 'maximized' : ''}`} style={isPostMaximized ? {} : { height: '200px', background: 'var(--color-bg-panel)', borderRadius: 'var(--radius-sm)', padding: '8px', overflow: 'hidden' }}>
+                            {/* Close button for maximized view */}
+                            {isPostMaximized && (
+                                <button
+                                    onClick={() => setIsPostMaximized(false)}
+                                    style={{
+                                        position: 'absolute',
+                                        top: '12px',
+                                        right: '12px',
+                                        background: 'var(--color-bg-panel)',
+                                        border: '1px solid var(--color-border)',
+                                        borderRadius: '50%',
+                                        width: '32px',
+                                        height: '32px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        zIndex: 10001
+                                    }}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            )}
+                            <div className="post-detail-content">
+                                <PostDetail post={selectedPost} selectedKeywords={selectedKeywords} />
+                            </div>
                         </div>
                     </section>
 
