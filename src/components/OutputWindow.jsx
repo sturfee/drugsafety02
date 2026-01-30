@@ -1,7 +1,7 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 
-const OutputWindow = ({ result, isExecuting, onSelectPost }) => {
+const OutputWindow = ({ result, isExecuting, onSelectPost, activeRuleId }) => {
 
     // Function to convert JSON to CSV and trigger download
     const handleDownloadCSV = () => {
@@ -19,11 +19,15 @@ const OutputWindow = ({ result, isExecuting, onSelectPost }) => {
             }).join(','))
         ].join('\n');
 
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const rulePart = activeRuleId ? `step-${activeRuleId}` : 'output';
+        const filename = `${rulePart}-${timestamp}.csv`;
+
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', 'rule_output.csv');
+        link.setAttribute('download', filename);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

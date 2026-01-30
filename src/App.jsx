@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { fetchKeywords, fetchMentions, fetchUniqueAuthors, fetchAuthors } from './services/api';
+import {
+    fetchKeywords, fetchMentions, fetchAuthors, fetchUniqueAuthors, fetchMentionById
+} from './services/api';
 import KeywordDropdown from './components/KeywordDropdown';
 import PostDetail from './components/PostDetail';
 import OutputPanel from './components/OutputPanel';
@@ -188,6 +190,28 @@ function App() {
             });
     };
 
+
+    const handleSelectPostFromOutput = async (row) => {
+        // If row has content and author, use it directly
+        if (row.content && row.author && row.date) {
+            setSelectedPost(row);
+            return;
+        }
+
+        // Otherwise try to fetch by ID
+        const id = row.id || row.ID || row.Id || row.post_id;
+        if (id) {
+            try {
+                const fullPost = await fetchMentionById(id);
+                setSelectedPost(fullPost);
+            } catch (err) {
+                console.error("Failed to fetch post details:", err);
+                // Fallback: set what we have, might show empty detail but avoids crash
+                setSelectedPost(row);
+            }
+        }
+    };
+
     return (
         <div className="main-wrapper">
             <header className="app-header">
@@ -209,7 +233,8 @@ function App() {
                             <OutputWindow
                                 result={ruleResults[activeRuleId]}
                                 isExecuting={isExecutingRule}
-                                onSelectPost={setSelectedPost}
+                                onSelectPost={handleSelectPostFromOutput}
+                                activeRuleId={activeRuleId}
                             />
                         </div>
                     </section>
