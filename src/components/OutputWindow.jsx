@@ -112,37 +112,36 @@ const OutputWindow = ({ result, isExecuting, onSelectPost, activeRuleId, activeR
     const { data, message, explanation } = result;
 
     return (
+    return (
         <div className="output-window" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{ paddingBottom: '12px', borderBottom: '1px solid var(--color-border)', marginBottom: '12px', flexShrink: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#000', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 800 }}>Response</h3>
+                    <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#000', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 800 }}>
+                        Response {data ? `(${data.length})` : ''}
+                    </h3>
 
                     {data && data.length > 0 && (
-                        <button
-                            onClick={handleDownloadCSV}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                background: 'transparent',
-                                border: '1px solid var(--color-border)',
-                                padding: '4px 8px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                fontSize: '0.75rem',
-                                color: 'var(--color-text-main)'
-                            }}
-                        >
-                            <Download size={14} /> Save as CSV
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                                onClick={handleDownloadCSV}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    background: 'transparent',
+                                    border: '1px solid var(--color-border)',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--color-text-main)'
+                                }}
+                            >
+                                <Download size={14} /> Save as CSV
+                            </button>
+                        </div>
                     )}
                 </div>
-
-                {explanation && (
-                    <div style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--color-text-main)', fontStyle: 'italic', borderLeft: '3px solid var(--color-primary)', paddingLeft: '10px' }}>
-                        {explanation}
-                    </div>
-                )}
             </div>
 
             <div style={{ flex: 1, overflow: 'auto', background: 'var(--color-bg-app)', borderRadius: '4px' }}>
