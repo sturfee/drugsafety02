@@ -1,4 +1,4 @@
-# drug-safety-explorer (DXE)
+# Drug-Safety-Explorer (DXE)
 
 Social pharmacovigilance signal exploration UI.
 
