@@ -1,10 +1,10 @@
-# Pharmacovigilance Workbench
+# Drug-Safety-Explorer [DSX]
 
-**Drug Safety and Performance insights directly from Patient Experience**
+**Drug safety and performance insights directly from patient experience**
 
-AI-powered workbench that listens to patient experience shared over social channels, adverse event reports submitted to FDA, de-identified pharmacy and medical claims to generate deep insights about drugs. A must needed tool for pharmaceutical companies manufacturing and distributing medications.
+An AI-powered DSX workbench that listens to patient experiences shared across social channels, FDA adverse event reports, and de-identified pharmacy and medical claims to generate deep, actionable insights on drug performance and safety. A must-have AI tool for pharmaceutical companies developing, manufacturing, and distributing medications.
 
-![Dashboard Preview](assets/dashboard_new.png)
+![Dashboard Preview](assets/dashboard_new.pn
 
 ## Overview
 
