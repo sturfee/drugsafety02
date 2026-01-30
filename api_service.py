@@ -250,7 +250,28 @@ def get_mentions(
                 "source": "Reddit"
             })
             
-        return {"mentions": results, "total": total_count}
+        return {"total": total_count, "page": offset // limit, "mentions": results}
+
+@app.get("/api/mentions/{mention_id}", tags=["Data"], summary="Get Single Mention")
+def get_mention_by_id(mention_id: int, conn=Depends(get_db_connection)):
+    """Fetch a single mention by its ID."""
+    with conn.cursor(cursor_factory=extras.RealDictCursor) as cur:
+        cur.execute("SELECT id, author, content, received_at, url, sentiment, keyword FROM kwatch_alert_results WHERE id = %s", (mention_id,))
+        row = cur.fetchone()
+        
+        if not row:
+            raise HTTPException(status_code=404, detail="Mention not found")
+            
+        return {
+            "id": row['id'],
+            "author": row['author'],
+            "content": row['content'],
+            "date": row['received_at'].isoformat() if row['received_at'] else None,
+            "url": row['url'],
+            "sentiment": row['sentiment'] or 'neutral',
+            "keyword": row['keyword'],
+            "source": "Reddit"
+        }
 
 @app.get("/api/stats/unique-authors", tags=["Analytics"], summary="Get Unique Author Count")
 def get_unique_authors(
