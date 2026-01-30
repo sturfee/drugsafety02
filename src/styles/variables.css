@@ -79,9 +79,9 @@
 
 /* --- Pharma (Lilly Style) Theme --- */
 [data-theme="pharma"] {
-  --color-primary: #D31710;
-  /* Lilly Red */
-  --color-primary-dark: #A50F0A;
+  --color-primary: #E63935;
+  /* Lighter/Brighter Red */
+  --color-primary-dark: #C62828;
   --color-secondary: #007A55;
   /* Accent Green */
 

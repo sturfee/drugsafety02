@@ -61,7 +61,7 @@ const ThemeSwitcher = () => {
                 }
                 
                 .theme-switcher.expanded {
-                    max-width: 300px;
+                    max-width: 400px;
                     padding-right: 12px;
                     gap: 8px;
                 }
