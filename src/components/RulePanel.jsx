@@ -333,9 +333,9 @@ const RulePanel = ({
                         }
 
                         .btn-save.dirty {
-                            background: var(--color-primary); /* Blue */
-                            color: #000;
-                            border-color: var(--color-primary);
+                            background: #60A5FA; /* Explicit Blue */
+                            color: #FFF;
+                            border-color: #60A5FA;
                         }
                         
                         .btn-save:hover {
