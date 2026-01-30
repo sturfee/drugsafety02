@@ -292,8 +292,8 @@ function App() {
                                     onClick={() => setIsPostMaximized(false)}
                                     style={{
                                         position: 'absolute',
-                                        top: '12px',
-                                        right: '12px',
+                                        top: '4px',
+                                        right: '4px',
                                         background: 'var(--color-bg-panel)',
                                         border: '1px solid var(--color-border)',
                                         borderRadius: '50%',
