@@ -13,31 +13,63 @@ const PostDetail = ({ post, selectedKeywords = [] }) => {
     // Use original URL, but strip query parameters for cleanliness
     const cleanUrl = post.url ? post.url.split('?')[0] : '#';
 
-    const highlightKeywords = (content) => {
-        if (!content || !selectedKeywords || selectedKeywords.length === 0) return content;
+    const highlightContent = (content) => {
+        if (!content) return content;
 
-        let kws = selectedKeywords;
-        if (selectedKeywords.includes('All')) {
-            // If 'All' is selected, highlight nothing or we'd need to know all available keywords.
-            // Based on user feedback, they probably mean the specific ones they are looking at.
-            // I will skip highlighting for 'All' to avoid messy UI, or if kws has more than 'All'.
+        // 1. Gather Keywords (Yellow)
+        let kws = [];
+        if (selectedKeywords && selectedKeywords.length > 0 && !selectedKeywords.includes('All')) {
             kws = selectedKeywords.filter(k => k !== 'All');
         }
 
-        if (kws.length === 0) return content;
+        // 2. Gather Extracted Values (Blue)
+        let extractedValues = [];
+        if (post.extractedData) {
+            extractedValues = Object.entries(post.extractedData)
+                .filter(([key, val]) => {
+                    if (['id', 'post_id', 'url', 'date', 'received_at', 'source', 'sentiment', 'c', 'keyword'].includes(key.toLowerCase())) return false;
+                    return val && String(val).length > 1;
+                })
+                .map(([, val]) => String(val));
+        }
 
-        // Create a regex to match any of the keywords (case-insensitive)
-        const escapedKws = kws.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-        const regex = new RegExp(`(${escapedKws.join('|')})`, 'gi');
+        // 3. Build Regex
+        const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const allTerms = [
+            ...kws.map(k => ({ term: k, type: 'keyword' })),
+            ...extractedValues.map(v => ({ term: v, type: 'extracted' }))
+        ];
+
+        if (allTerms.length === 0) return content;
+
+        // Sort by length desc
+        allTerms.sort((a, b) => b.term.length - a.term.length);
+
+        const pattern = allTerms.map(t => escapeRegExp(t.term)).join('|');
+        const regex = new RegExp(`(${pattern})`, 'gi');
 
         const parts = content.split(regex);
-        return parts.map((part, i) =>
-            regex.test(part) ? (
-                <mark key={i} style={{ backgroundColor: '#E6FE53', color: '#000', padding: '0 2px', borderRadius: '2px' }}>
-                    {part}
-                </mark>
-            ) : part
-        );
+
+        return parts.map((part, i) => {
+            const match = allTerms.find(t => t.term.toLowerCase() === part.toLowerCase());
+            if (match) {
+                if (match.type === 'keyword') {
+                    return (
+                        <mark key={i} style={{ backgroundColor: '#E6FE53', color: '#000', padding: '0 2px', borderRadius: '2px' }}>
+                            {part}
+                        </mark>
+                    );
+                } else {
+                    return (
+                        <mark key={i} style={{ backgroundColor: '#60A5FA', color: '#FFF', padding: '0 2px', borderRadius: '2px' }}>
+                            {part}
+                        </mark>
+                    );
+                }
+            }
+            return part;
+        });
     };
 
     return (
